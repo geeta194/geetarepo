@@ -1,0 +1,84 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "datafactorynewtest"
+		},
+		"AzureBlobStorage3_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage5_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_password": {
+			"value": ""
+		},
+		"Oracle_core_schema_connectionString": {
+			"value": ""
+		},
+		"SqlServer_onprem_password": {
+			"value": ""
+		},
+		"azuresql_new_ls_password": {
+			"value": ""
+		},
+		"ls adls storage for dataflow_connectionString": {
+			"value": ""
+		},
+		"ls_archive_files_connectionString": {
+			"value": ""
+		},
+		"ls_azuresql_for_dataflow_password": {
+			"value": ""
+		},
+		"ls_mssql_onprem_connectionString": {
+			"value": ""
+		},
+		"ls_oracle_onpremise_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"value": "azureservernew1.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"value": "azuredbnew"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"value": "geeta"
+		},
+		"SqlServer_onprem_properties_typeProperties_server": {
+			"value": "DESKTOP-9OVP7SU\\SQLEXPRESS"
+		},
+		"SqlServer_onprem_properties_typeProperties_database": {
+			"value": "Geeta"
+		},
+		"SqlServer_onprem_properties_typeProperties_userName": {
+			"value": "geeta"
+		},
+		"azuresql_new_ls_properties_typeProperties_server": {
+			"value": "azureservernew1.database.windows.net"
+		},
+		"azuresql_new_ls_properties_typeProperties_database": {
+			"value": "azuredbnew"
+		},
+		"azuresql_new_ls_properties_typeProperties_userName": {
+			"value": "geeta"
+		},
+		"ls_azuresql_for_dataflow_properties_typeProperties_server": {
+			"value": "azureservernew1.database.windows.net"
+		},
+		"ls_azuresql_for_dataflow_properties_typeProperties_database": {
+			"value": "azuredbnew"
+		},
+		"ls_azuresql_for_dataflow_properties_typeProperties_userName": {
+			"value": "geeta"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

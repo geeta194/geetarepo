@@ -1,0 +1,263 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "datafactorynewtest"
+		},
+		"AzureBlobStorage3_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage3'"
+		},
+		"AzureBlobStorage5_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage5'"
+		},
+		"AzureSqlDatabase1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
+		},
+		"Oracle_core_schema_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Oracle_core_schema'"
+		},
+		"SqlServer_onprem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SqlServer_onprem'"
+		},
+		"azuresql_new_ls_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'azuresql_new_ls'"
+		},
+		"ls adls storage for dataflow_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls adls storage for dataflow'"
+		},
+		"ls_archive_files_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_archive_files'"
+		},
+		"ls_azuresql_for_dataflow_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'ls_azuresql_for_dataflow'"
+		},
+		"ls_mssql_onprem_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_mssql_onprem'"
+		},
+		"ls_oracle_onpremise_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_oracle_onpremise'"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "azureservernew1.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "azuredbnew"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "geeta"
+		},
+		"SqlServer_onprem_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "DESKTOP-9OVP7SU\\SQLEXPRESS"
+		},
+		"SqlServer_onprem_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "Geeta"
+		},
+		"SqlServer_onprem_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "geeta"
+		},
+		"azuresql_new_ls_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "azureservernew1.database.windows.net"
+		},
+		"azuresql_new_ls_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "azuredbnew"
+		},
+		"azuresql_new_ls_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "geeta"
+		},
+		"ls_azuresql_for_dataflow_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "azureservernew1.database.windows.net"
+		},
+		"ls_azuresql_for_dataflow_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "azuredbnew"
+		},
+		"ls_azuresql_for_dataflow_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "geeta"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "datafactorynewtest_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobStorage3_connectionString": {
+						"value": "[parameters('AzureBlobStorage3_connectionString')]"
+					},
+					"AzureBlobStorage5_connectionString": {
+						"value": "[parameters('AzureBlobStorage5_connectionString')]"
+					},
+					"AzureSqlDatabase1_password": {
+						"value": "[parameters('AzureSqlDatabase1_password')]"
+					},
+					"azuresql_new_ls_password": {
+						"value": "[parameters('azuresql_new_ls_password')]"
+					},
+					"ls adls storage for dataflow_connectionString": {
+						"value": "[parameters('ls adls storage for dataflow_connectionString')]"
+					},
+					"ls_archive_files_connectionString": {
+						"value": "[parameters('ls_archive_files_connectionString')]"
+					},
+					"ls_azuresql_for_dataflow_password": {
+						"value": "[parameters('ls_azuresql_for_dataflow_password')]"
+					},
+					"Oracle_core_schema_connectionString": {
+						"value": "[parameters('Oracle_core_schema_connectionString')]"
+					},
+					"SqlServer_onprem_password": {
+						"value": "[parameters('SqlServer_onprem_password')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_server": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_database": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_database')]"
+					},
+					"AzureSqlDatabase1_properties_typeProperties_userName": {
+						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]"
+					},
+					"azuresql_new_ls_properties_typeProperties_server": {
+						"value": "[parameters('azuresql_new_ls_properties_typeProperties_server')]"
+					},
+					"azuresql_new_ls_properties_typeProperties_database": {
+						"value": "[parameters('azuresql_new_ls_properties_typeProperties_database')]"
+					},
+					"azuresql_new_ls_properties_typeProperties_userName": {
+						"value": "[parameters('azuresql_new_ls_properties_typeProperties_userName')]"
+					},
+					"ls_azuresql_for_dataflow_properties_typeProperties_server": {
+						"value": "[parameters('ls_azuresql_for_dataflow_properties_typeProperties_server')]"
+					},
+					"ls_azuresql_for_dataflow_properties_typeProperties_database": {
+						"value": "[parameters('ls_azuresql_for_dataflow_properties_typeProperties_database')]"
+					},
+					"ls_azuresql_for_dataflow_properties_typeProperties_userName": {
+						"value": "[parameters('ls_azuresql_for_dataflow_properties_typeProperties_userName')]"
+					},
+					"SqlServer_onprem_properties_typeProperties_server": {
+						"value": "[parameters('SqlServer_onprem_properties_typeProperties_server')]"
+					},
+					"SqlServer_onprem_properties_typeProperties_database": {
+						"value": "[parameters('SqlServer_onprem_properties_typeProperties_database')]"
+					},
+					"SqlServer_onprem_properties_typeProperties_userName": {
+						"value": "[parameters('SqlServer_onprem_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "datafactorynewtest_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"ls_mssql_onprem_connectionString": {
+						"value": "[parameters('ls_mssql_onprem_connectionString')]"
+					},
+					"ls_oracle_onpremise_connectionString": {
+						"value": "[parameters('ls_oracle_onpremise_connectionString')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'datafactorynewtest_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "datafactorynewtest_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'datafactorynewtest_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "datafactorynewtest_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'datafactorynewtest_ArmTemplate_2')]"
+			]
+		}
+	]
+}
