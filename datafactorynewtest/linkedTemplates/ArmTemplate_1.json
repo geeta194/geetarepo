@@ -7,6 +7,14 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "datafactorynewtest"
 		},
+		"Oracle_core_schema_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Oracle_core_schema'"
+		},
+		"SqlServer_onprem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SqlServer_onprem'"
+		},
 		"ls_mssql_onprem_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_mssql_onprem'"
@@ -14,12 +22,67 @@
 		"ls_oracle_onpremise_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_oracle_onpremise'"
+		},
+		"SqlServer_onprem_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "DESKTOP-9OVP7SU\\SQLEXPRESS"
+		},
+		"SqlServer_onprem_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "Geeta"
+		},
+		"SqlServer_onprem_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "geeta"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Oracle_core_schema')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Oracle",
+				"typeProperties": {
+					"connectionString": "[parameters('Oracle_core_schema_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntime1",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServer_onprem')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('SqlServer_onprem_properties_typeProperties_server')]",
+					"database": "[parameters('SqlServer_onprem_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('SqlServer_onprem_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('SqlServer_onprem_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntime1",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ls_mssql_onprem')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -1436,7 +1499,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SqlServer_onprem')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/oracle_db_onprem_with_param')]",
@@ -1504,7 +1569,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Oracle_core_schema')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/sqlserver_db_onprem')]",
@@ -1701,130 +1768,6 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> sink1"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflow_unpivot')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "unpivot1"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          CLAIM_ID as integer,",
-						"          BUCKET1 as integer,",
-						"          BUCKET2 as integer,",
-						"          BUCKET3 as integer,",
-						"          BUCKET4 as integer",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> source1",
-						"source1 unpivot(output(",
-						"          BUCKET_VALUE as string,",
-						"          BUCKET_AMOUNT as integer",
-						"     ),",
-						"     ungroupBy(CLAIM_ID),",
-						"     lateral: true,",
-						"     ignoreNullPivots: false) ~> unpivot1",
-						"unpivot1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/emp1copy_cumsal_senario3')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"folder": {
-					"name": "senario"
-				},
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "dataset_fordataflow",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "ls_azuresql_for_dataflow",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "window1"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          emp_id as short,",
-						"          name as string,",
-						"          salary as integer",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> source1",
-						"source1 window(asc(salary, true),",
-						"     cumsalary = sum(salary)) ~> window1",
-						"window1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     recreate:true,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
 					]
 				}
 			},

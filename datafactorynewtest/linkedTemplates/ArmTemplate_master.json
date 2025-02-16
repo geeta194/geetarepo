@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage5'"
 		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
 		"AzureSqlDatabase1_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
@@ -50,6 +54,10 @@
 		"ls_oracle_onpremise_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_oracle_onpremise'"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://staccoungtest.dfs.core.windows.net/"
 		},
 		"AzureSqlDatabase1_properties_typeProperties_server": {
 			"type": "string",
@@ -132,6 +140,9 @@
 					"AzureBlobStorage5_connectionString": {
 						"value": "[parameters('AzureBlobStorage5_connectionString')]"
 					},
+					"AzureDataLakeStorage1_accountKey": {
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					},
 					"AzureSqlDatabase1_password": {
 						"value": "[parameters('AzureSqlDatabase1_password')]"
 					},
@@ -147,11 +158,8 @@
 					"ls_azuresql_for_dataflow_password": {
 						"value": "[parameters('ls_azuresql_for_dataflow_password')]"
 					},
-					"Oracle_core_schema_connectionString": {
-						"value": "[parameters('Oracle_core_schema_connectionString')]"
-					},
-					"SqlServer_onprem_password": {
-						"value": "[parameters('SqlServer_onprem_password')]"
+					"AzureDataLakeStorage1_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
 					},
 					"AzureSqlDatabase1_properties_typeProperties_server": {
 						"value": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]"
@@ -179,15 +187,6 @@
 					},
 					"ls_azuresql_for_dataflow_properties_typeProperties_userName": {
 						"value": "[parameters('ls_azuresql_for_dataflow_properties_typeProperties_userName')]"
-					},
-					"SqlServer_onprem_properties_typeProperties_server": {
-						"value": "[parameters('SqlServer_onprem_properties_typeProperties_server')]"
-					},
-					"SqlServer_onprem_properties_typeProperties_database": {
-						"value": "[parameters('SqlServer_onprem_properties_typeProperties_database')]"
-					},
-					"SqlServer_onprem_properties_typeProperties_userName": {
-						"value": "[parameters('SqlServer_onprem_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -207,11 +206,26 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"Oracle_core_schema_connectionString": {
+						"value": "[parameters('Oracle_core_schema_connectionString')]"
+					},
+					"SqlServer_onprem_password": {
+						"value": "[parameters('SqlServer_onprem_password')]"
+					},
 					"ls_mssql_onprem_connectionString": {
 						"value": "[parameters('ls_mssql_onprem_connectionString')]"
 					},
 					"ls_oracle_onpremise_connectionString": {
 						"value": "[parameters('ls_oracle_onpremise_connectionString')]"
+					},
+					"SqlServer_onprem_properties_typeProperties_server": {
+						"value": "[parameters('SqlServer_onprem_properties_typeProperties_server')]"
+					},
+					"SqlServer_onprem_properties_typeProperties_database": {
+						"value": "[parameters('SqlServer_onprem_properties_typeProperties_database')]"
+					},
+					"SqlServer_onprem_properties_typeProperties_userName": {
+						"value": "[parameters('SqlServer_onprem_properties_typeProperties_userName')]"
 					}
 				}
 			},

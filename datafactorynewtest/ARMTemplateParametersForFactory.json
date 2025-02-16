@@ -11,6 +11,9 @@
 		"AzureBlobStorage5_connectionString": {
 			"value": ""
 		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
 		"AzureSqlDatabase1_password": {
 			"value": ""
 		},
@@ -37,6 +40,9 @@
 		},
 		"ls_oracle_onpremise_connectionString": {
 			"value": ""
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://staccoungtest.dfs.core.windows.net/"
 		},
 		"AzureSqlDatabase1_properties_typeProperties_server": {
 			"value": "azureservernew1.database.windows.net"
