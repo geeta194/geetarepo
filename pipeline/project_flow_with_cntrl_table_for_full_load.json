@@ -1,0 +1,362 @@
+{
+	"name": "project_flow_with_cntrl_table_for_full_load",
+	"properties": {
+		"activities": [
+			{
+				"name": "lookup on control_table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select* from METADATA.CONTROL_TABLE where source_system='@{pipeline().parameters.SOURCE_SYSTEM}' and load_type='@{pipeline().parameters.LOAD_TYPE}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "CONTROL_TABLE",
+							"schema_name": "METADATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "process sources table",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "lookup on control_table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lookup on control_table').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "copy data_onprmsql_to_azblob",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "sqlserver_db_onprem",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema_name": {
+											"value": "@item().SOURCE_TABLE_SCHEMA\n",
+											"type": "Expression"
+										},
+										"table_name": {
+											"value": "@item().SOURCE_TABLE_NAME",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "azureblob_storage_with_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"contanier_name": "project-folder",
+										"filename": {
+											"value": "@concat(item().TARGET_TABLE,'.csv')",
+											"type": "Expression"
+										},
+										"folder_name": {
+											"value": "@item().SOURCE_TABLE_SCHEMA",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "azblob_to_azsql",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "copy data_onprmsql_to_azblob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "truncate table @{item().TARGET_TABLE_SCHEMA}.@{item().TARGET_TABLE}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "azureblob_storage_with_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"contanier_name": "project-folder",
+										"filename": {
+											"value": "@concat(item().TARGET_TABLE,'.csv')\n\n",
+											"type": "Expression"
+										},
+										"folder_name": {
+											"value": "@item().SOURCE_TABLE_SCHEMA",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "AzureSql_dataset_withparam",
+									"type": "DatasetReference",
+									"parameters": {
+										"table_name": {
+											"value": "@item().TARGET_TABLE",
+											"type": "Expression"
+										},
+										"schema_name": "@item().TARGET_TABLE_SCHEMA"
+									}
+								}
+							]
+						},
+						{
+							"name": "arcive_the_file_to_arcival_location",
+							"type": "Copy",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
+							"dependsOn": [
+								{
+									"activity": "azblob_to_azsql",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "azureblob_storage_with_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"contanier_name": "project-folder",
+										"filename": "@concat(item().TARGET_TABLE,'.csv')",
+										"folder_name": "@item().SOURCE_TABLE_SCHEMA"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "dataset_for_arcive",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "arcive",
+										"file": {
+											"value": "@concat(item().TARGET_TABLE,'_',utcNow(),'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "delete_file_from_blob_after_arcive",
+							"type": "Delete",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
+							"dependsOn": [
+								{
+									"activity": "arcive_the_file_to_arcival_location",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "azureblob_storage_with_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"contanier_name": "project-folder",
+										"filename": "@concat(item().TARGET_TABLE,'.csv')",
+										"folder_name": "@item().SOURCE_TABLE_SCHEMA"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"SOURCE_SYSTEM": {
+				"type": "string",
+				"defaultValue": "SQL_SERVER"
+			},
+			"LOAD_TYPE": {
+				"type": "string",
+				"defaultValue": "FULL"
+			}
+		},
+		"variables": {
+			"max_update_date": {
+				"type": "String"
+			},
+			"v_max_update_date": {
+				"type": "String"
+			},
+			"max_updat_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "class_HW_folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-21T17:52:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

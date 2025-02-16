@@ -1,0 +1,124 @@
+{
+	"name": "copy_to_arcivle_path_from_adls_and_zip_and_delet_frm_adls",
+	"properties": {
+		"activities": [
+			{
+				"name": "copy_and_zip_to_arcivle_path_from_adls",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "output",
+							"filename": "customer.csv",
+							"folder_name": {
+								"value": " ",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "dataset_for_arcive",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "arcive",
+							"file": "customer.csv"
+						}
+					}
+				]
+			},
+			{
+				"name": "delete from src_after arcive",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "copy_and_zip_to_arcivle_path_from_adls",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "output",
+							"filename": "customer.csv",
+							"folder_name": {
+								"value": " ",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "class_HW_folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-05T17:42:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

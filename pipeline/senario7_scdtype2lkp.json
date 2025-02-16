@@ -1,0 +1,56 @@
+{
+	"name": "senario7_scdtype2lkp",
+	"properties": {
+		"activities": [
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "senario7_scdtype2lkp",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"emp1src": {
+								"container_name": "project-folder",
+								"folder_name": "src_folder",
+								"file_name": "emp1.csv"
+							},
+							"sinklkp": {
+								"table_name": "emp1_tgt",
+								"schema_name": "dbo"
+							},
+							"sinkinsert": {
+								"table_name": "emp1_tgt",
+								"schema_name": "dbo"
+							},
+							"sinkupdate": {
+								"table_name": "emp1_tgt",
+								"schema_name": "dbo"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "senario"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-30T20:44:48Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

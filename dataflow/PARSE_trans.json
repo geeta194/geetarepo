@@ -1,0 +1,83 @@
+{
+	"name": "PARSE_trans",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "parse1project"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "parse1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EMPLOYEE_NAME as string,",
+				"          PROJECTS as string,",
+				"          ADDRESS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 parse(PROJECTS_new = PROJECTS ? (projects1 as string,",
+				"          projects2 as string),",
+				"     format: 'delimited',",
+				"     columnNamesAsHeader: false,",
+				"     columnDelimiter: '|',",
+				"     nullValue: '') ~> parse1project",
+				"parse1project select(mapColumn(",
+				"          EMPLOYEE_NAME,",
+				"          PROJECTS1 = PROJECTS_new.projects1,",
+				"          PROJECT2 = PROJECTS_new.projects2,",
+				"          ADDRESS",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 parse(ADDRESS_NEW = ADDRESS ? (COUNTRY as string,",
+				"          CITY as string),",
+				"     format: 'json',",
+				"     documentForm: 'singleDocument') ~> parse1",
+				"parse1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          EMPLOYEE_NAME,",
+				"          PROJECT1 = PROJECTS1,",
+				"          PROJECT2,",
+				"          COUNTRY = ADDRESS_NEW.COUNTRY,",
+				"          CITY = ADDRESS_NEW.CITY",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

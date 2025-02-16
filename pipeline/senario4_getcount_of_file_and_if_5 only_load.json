@@ -1,0 +1,129 @@
+{
+	"name": "senario4_getcount_of_file_and_if_5 only_load",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "project-folder",
+							"filename": {
+								"value": "*.*",
+								"type": "Expression"
+							},
+							"folder_name": "emp"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "countfile",
+					"value": {
+						"value": "@length(activity('Get Metadata1').output.childItems)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('countfile'),4)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Fail1",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "filecountis not 5",
+								"errorCode": "200"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "exeplinfortruecondiyion",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "senario4_copy_activity_if true",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"countfile": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "senario"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-25T20:22:53Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

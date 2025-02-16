@@ -1,0 +1,91 @@
+{
+	"name": "getting_deleted_file_to_src_location",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": {
+								"value": "@pipeline().parameters.schema",
+								"type": "Expression"
+							},
+							"table_name": {
+								"value": "@pipeline().parameters.table",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "input",
+							"filename": {
+								"value": "@concat(pipeline().parameters.table,'.csv')",
+								"type": "Expression"
+							},
+							"folder_name": "new"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"schema": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "New folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-05T17:42:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

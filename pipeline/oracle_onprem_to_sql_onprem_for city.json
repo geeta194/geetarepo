@@ -1,0 +1,117 @@
+{
+	"name": "oracle_onprem_to_sql_onprem_for city",
+	"properties": {
+		"activities": [
+			{
+				"name": "oracle_onprem_to_sql_onprem_for city",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "EMPNO",
+									"type": "Double"
+								},
+								"sink": {
+									"name": "empno",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "CITY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "city",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "oracle_db_onprem_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": {
+								"value": "@pipeline().parameters.schema_name",
+								"type": "Expression"
+							},
+							"table_name": {
+								"value": "@pipeline().parameters.table_name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": {
+								"value": "@pipeline().parameters.t_schema_name",
+								"type": "Expression"
+							},
+							"table_name": {
+								"value": "@pipeline().parameters.t_table_name",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"schema_name": {
+				"type": "string"
+			},
+			"table_name": {
+				"type": "string"
+			},
+			"t_schema_name": {
+				"type": "string"
+			},
+			"t_table_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "class_HW_folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-04T16:53:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

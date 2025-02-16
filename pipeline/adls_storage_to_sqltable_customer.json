@@ -1,0 +1,172 @@
+{
+	"name": "adls_storage_to_sqltable_customer",
+	"properties": {
+		"activities": [
+			{
+				"name": "adls_storage_to_sqltable_customer",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate"
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "input",
+							"filename": "customers.csv",
+							"folder_name": {
+								"value": " ",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": "dbo",
+							"table_name": "customers"
+						}
+					}
+				]
+			},
+			{
+				"name": "sqldb_to_adlstorage",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "adls_storage_to_sqltable_customer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": "dbo",
+							"table_name": "customers"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "output",
+							"filename": "customer.csv",
+							"folder_name": {
+								"value": " ",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "copy_to_arcivle_frm_adls_and_zip_and_delet_frm_adls",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "sqldb_to_adlstorage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "copy_to_arcivle_path_from_adls_and_zip_and_delet_frm_adls",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "class_HW_folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-05T17:42:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

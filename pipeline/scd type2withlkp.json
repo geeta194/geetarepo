@@ -1,0 +1,52 @@
+{
+	"name": "scd type2withlkp",
+	"properties": {
+		"activities": [
+			{
+				"name": "scdtype2withlkp",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "scdtype2withlkp",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"empsrc": {
+								"schema_name": "dbo",
+								"table_name": "emp2src"
+							},
+							"sinkforlkp": {
+								"schema_name": "dbo",
+								"table_name": "emp2"
+							},
+							"sink1": {
+								"schema_name": "dbo",
+								"table_name": "emp2"
+							},
+							"sink2": {
+								"schema_name": "dbo",
+								"table_name": "emp2"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-12-24T19:45:56Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

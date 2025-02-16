@@ -1,0 +1,90 @@
+{
+	"name": "azureblob_storage_with_param",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage5",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"contanier_name": {
+				"type": "string"
+			},
+			"filename": {
+				"type": "string"
+			},
+			"folder_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().folder_name",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().contanier_name",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "EMPLOYEE_ID",
+				"type": "String"
+			},
+			{
+				"name": "FIRST_NAME",
+				"type": "String"
+			},
+			{
+				"name": "LAST_NAME",
+				"type": "String"
+			},
+			{
+				"name": "EMAIL",
+				"type": "String"
+			},
+			{
+				"name": "PHONE_NUMBER",
+				"type": "String"
+			},
+			{
+				"name": "HIRE_DATE",
+				"type": "String"
+			},
+			{
+				"name": "JOB_ID",
+				"type": "String"
+			},
+			{
+				"name": "SALARY",
+				"type": "String"
+			},
+			{
+				"name": "COMMISSION_PCT",
+				"type": "String"
+			},
+			{
+				"name": "MANAGER_ID",
+				"type": "String"
+			},
+			{
+				"name": "DEPARTMENT_ID",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

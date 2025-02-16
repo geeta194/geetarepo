@@ -1,0 +1,108 @@
+{
+	"name": "dup_handling_cityload",
+	"properties": {
+		"activities": [
+			{
+				"name": "dup_handling_cityload",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "AzureBlobStorage3",
+								"type": "LinkedServiceReference"
+							},
+							"path": "output"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": {
+								"value": "@pipeline().parameters.schema_name",
+								"type": "Expression"
+							},
+							"table_name": {
+								"value": "@pipeline().parameters.table_name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": {
+								"value": "@pipeline().parameters.t_schema",
+								"type": "Expression"
+							},
+							"table_name": {
+								"value": "@pipeline().parameters.t_table",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"schema_name": {
+				"type": "string"
+			},
+			"table_name": {
+				"type": "string"
+			},
+			"t_schema": {
+				"type": "string"
+			},
+			"t_table": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "class_HW_folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-04T16:53:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

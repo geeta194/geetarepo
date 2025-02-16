@@ -1,0 +1,119 @@
+{
+	"name": "senario6_scd1emp",
+	"properties": {
+		"folder": {
+			"name": "senario"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dataset_fordataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sourceemp"
+				},
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "lkpsink"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sinkinsert"
+				},
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sinkupd"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "split1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          emp_id as short,",
+				"          name as string,",
+				"          salary as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceemp",
+				"source(output(",
+				"          emp_id as integer,",
+				"          name as string,",
+				"          salary as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> lkpsink",
+				"sourceemp, lkpsink lookup(sourceemp@emp_id == lkpsink@emp_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 select(mapColumn(",
+				"          emp_id = sourceemp@emp_id,",
+				"          name = sourceemp@name,",
+				"          salary = sourceemp@salary,",
+				"          lkp_emp_id = lkpsink@emp_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(insert_upd_flag = iif(isNull(lkp_emp_id),'i','u'),",
+				"     partitionBy('hash', 1)) ~> derivedColumn1",
+				"derivedColumn1 split(insert_upd_flag=='i',",
+				"     insert_upd_flag=='u',",
+				"     disjoint: false) ~> split1@(insert, update, default)",
+				"split1@update alterRow(updateIf(1==1)) ~> alterRow1",
+				"split1@insert sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     partitionBy('hash', 1)) ~> sinkinsert",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['emp_id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkupd"
+			]
+		}
+	}
+}

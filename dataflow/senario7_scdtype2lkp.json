@@ -1,0 +1,159 @@
+{
+	"name": "senario7_scdtype2lkp",
+	"properties": {
+		"folder": {
+			"name": "senario"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dataset_fordataflow",
+						"type": "DatasetReference"
+					},
+					"name": "emp1src"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "sinklkp"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "sinkinsert"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "sinkupdate"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lkptocomparesrctgt"
+				},
+				{
+					"name": "selecttochangecolumnname"
+				},
+				{
+					"name": "derivedinsertupdate"
+				},
+				{
+					"name": "derivedColumntoinserttheflagvalueas1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "derivedColumntoupdatetheflagvalue"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter2updatetheflagvalueas0"
+				},
+				{
+					"name": "filter2passinsertnewandupdatedrecord"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          emp_id as short,",
+				"          name as string,",
+				"          salary as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> emp1src",
+				"source(output(",
+				"          sk_key as integer,",
+				"          emp_id as integer,",
+				"          name as string,",
+				"          salary as string,",
+				"          flag as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select * from emp1_tgt where flag=1',",
+				"     format: 'query') ~> sinklkp",
+				"emp1src, sinklkp lookup(emp1src@emp_id == sinklkp@emp_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lkptocomparesrctgt",
+				"lkptocomparesrctgt select(mapColumn(",
+				"          emp_id = emp1src@emp_id,",
+				"          name = emp1src@name,",
+				"          salary = emp1src@salary,",
+				"          sk_key,",
+				"          sink_emp_id = sinklkp@emp_id,",
+				"          sink_name = sinklkp@name,",
+				"          sink_salary = sinklkp@salary,",
+				"          flag",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selecttochangecolumnname",
+				"selecttochangecolumnname derive(insert_update_logic = iif(isNull(sink_emp_id), 'i', iif(!isNull(sink_emp_id) && name!=sink_name || salary != sink_salary, 'u', ''))) ~> derivedinsertupdate",
+				"filter2passinsertnewandupdatedrecord derive(flag = 1) ~> derivedColumntoinserttheflagvalueas1",
+				"filter2updatetheflagvalueas0 alterRow(updateIf(1==1)) ~> alterRow1",
+				"alterRow1 derive(flag = 0) ~> derivedColumntoupdatetheflagvalue",
+				"derivedinsertupdate select(mapColumn(",
+				"          emp_id,",
+				"          name,",
+				"          salary,",
+				"          sk_key,",
+				"          flag,",
+				"          insert_update_logic",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 filter(insert_update_logic=='u') ~> filter2updatetheflagvalueas0",
+				"select1 filter(insert_update_logic=='i'||insert_update_logic=='u') ~> filter2passinsertnewandupdatedrecord",
+				"derivedColumntoinserttheflagvalueas1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          emp_id,",
+				"          name,",
+				"          salary,",
+				"          flag",
+				"     )) ~> sinkinsert",
+				"derivedColumntoupdatetheflagvalue sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['sk_key'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          sk_key,",
+				"          flag",
+				"     )) ~> sinkupdate"
+			]
+		}
+	}
+}

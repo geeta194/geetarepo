@@ -1,0 +1,48 @@
+{
+	"name": "senario3_emp1copy_cumsal",
+	"properties": {
+		"activities": [
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "emp1copy_cumsal_senario3",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"container_name": "project-folder",
+								"folder_name": "src_folder",
+								"file_name": "emp1.csv"
+							},
+							"sink1": {
+								"schema_name": "dbo",
+								"table_name": "emp1"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "senario"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-30T20:39:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

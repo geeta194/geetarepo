@@ -1,0 +1,205 @@
+{
+	"name": "incr_load_with_watermarktable",
+	"properties": {
+		"activities": [
+			{
+				"name": "lkponwatermarktable",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": "dbo",
+							"table_name": "wartermarktable"
+						}
+					}
+				}
+			},
+			{
+				"name": "latestupdatedate_Lookup_on file_src",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select max(last_modifytime) as latestupdatedate from file_src",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": {
+								"value": "@pipeline().parameters.schema_name",
+								"type": "Expression"
+							},
+							"table_name": {
+								"value": "@pipeline().parameters.table_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "lkponwatermarktable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "latestupdatedate_Lookup_on file_src",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "select * from file_src where last_modifytime>'@{activity('lkponwatermarktable').output.firstRow.watermarkvalue}' and last_modifytime<='@{activity('latestupdatedate_Lookup_on file_src').output.firstRow.latestupdatedate}'\n\n\n",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "sqlserver_db_onprem",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": "dbo.",
+							"table_name": "file_src"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "project-folder",
+							"filename": {
+								"value": "@concat('file.',pipeline().RunId)",
+								"type": "Expression"
+							},
+							"folder_name": "tgt_folder"
+						}
+					}
+				]
+			},
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[update_watermark_table]",
+					"storedProcedureParameters": {
+						"lastmodifytime": {
+							"value": {
+								"value": "@activity('latestupdatedate_Lookup_on file_src').output.firstRow.latestupdatedate",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"tablename": {
+							"value": {
+								"value": "@activity('latestupdatedate_Lookup_on file_src').output.firstRow.table_name\n",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SqlServer_onprem",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"schema_name": {
+				"type": "string"
+			},
+			"table_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-05T05:55:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

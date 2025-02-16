@@ -1,0 +1,103 @@
+{
+	"name": "azure_sql_table_to_adlsstorage_for customernew",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data sql_table_to_adlsstorage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": {
+								"value": "@pipeline().parameters.table_name",
+								"type": "Expression"
+							},
+							"schema_name": {
+								"value": "@pipeline().parameters.scheme_name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": {
+								"value": "@pipeline().parameters.container_name",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.file_name",
+								"type": "Expression"
+							},
+							"folder_name": {
+								"value": " ",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"scheme_name": {
+				"type": "string"
+			},
+			"table_name": {
+				"type": "string"
+			},
+			"container_name": {
+				"type": "string"
+			},
+			"file_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "class_HW_folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-05T17:51:51Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

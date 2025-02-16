@@ -1,0 +1,46 @@
+{
+	"name": "dataflowSKkey",
+	"properties": {
+		"activities": [
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowSKkey",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"contanier_name": "project-folder",
+								"filename": "employee.csv",
+								"folder_name": "src_folder"
+							},
+							"sink1": {
+								"contanier_name": "project-folder",
+								"filename": "SKEEMP.csv",
+								"folder_name": "tgt_folder"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-01-09T03:15:08Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

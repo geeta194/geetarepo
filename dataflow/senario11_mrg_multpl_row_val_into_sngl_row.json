@@ -1,0 +1,64 @@
+{
+	"name": "senario11_mrg_multpl_row_val_into_sngl_row",
+	"properties": {
+		"folder": {
+			"name": "senario"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dataset_fordataflow",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dataset_fordataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregatetogroupbyonidandname"
+				},
+				{
+					"name": "derivedColumntoconvertarytostringvalue"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as short,",
+				"          name as string,",
+				"          projects as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source1 aggregate(groupBy(id,",
+				"          name),",
+				"     projects = collect(projects)) ~> aggregatetogroupbyonidandname",
+				"aggregatetogroupbyonidandname derive(projects = replace(replace(replace(toString(projects),'[',''),']',''),'\"','')) ~> derivedColumntoconvertarytostringvalue",
+				"derivedColumntoconvertarytostringvalue sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          emp_id as string,",
+				"          name as string,",
+				"          salary as string,",
+				"          loc as string,",
+				"          { email} as string",
+				"     ),",
+				"     partitionFileNames:['senario11tgt_csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}

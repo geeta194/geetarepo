@@ -1,0 +1,49 @@
+{
+	"name": "senario10_split_singl_col_into_multiple_rows",
+	"properties": {
+		"activities": [
+			{
+				"name": "senario10_split_singl_col_into_multiple_rows",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "senario10_split_singl_col_into_multiple_rows",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"container_name": "project-folder",
+								"folder_name": "src_folder",
+								"file_name": "senario10.csv"
+							},
+							"sink1": {
+								"container_name": "project-folder",
+								"folder_name": "tgt_folder",
+								"file_name": "senario10.csv"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "senario"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-30T20:46:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

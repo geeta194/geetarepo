@@ -1,0 +1,145 @@
+{
+	"name": "getfiles_from_adls_dianamicaly_load_azuresql",
+	"properties": {
+		"activities": [
+			{
+				"name": "Getfilesfromadls",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "project-folder",
+							"filename": {
+								"value": "*.csv",
+								"type": "Expression"
+							},
+							"folder_name": "src_folder"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Getfilesfromadls",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Getfilesfromadls').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy data1_copy1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"wildcardFileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "azureblob_storage_with_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"contanier_name": "project-folder",
+										"filename": {
+											"value": " ",
+											"type": "Expression"
+										},
+										"folder_name": "src_folder"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "AzureSql_dataset_withparam",
+									"type": "DatasetReference",
+									"parameters": {
+										"table_name": {
+											"value": "@replace(item().name,'.csv','')",
+											"type": "Expression"
+										},
+										"schema_name": "dbo"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "senario"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-23T04:05:27Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

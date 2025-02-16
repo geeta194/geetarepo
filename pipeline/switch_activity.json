@@ -1,0 +1,199 @@
+{
+	"name": "switch_activity",
+	"properties": {
+		"activities": [
+			{
+				"name": "Switch1",
+				"type": "Switch",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@pipeline().parameters.s_file_name",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "employee.csv",
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "azureblob_storage_with_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"contanier_name": "input",
+												"filename": {
+													"value": "@pipeline().parameters.s_file_name",
+													"type": "Expression"
+												},
+												"folder_name": "new"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "azureblob_storage_with_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"contanier_name": "project-folder",
+												"filename": {
+													"value": " ",
+													"type": "Expression"
+												},
+												"folder_name": {
+													"value": "@pipeline().parameters.tgt_folder_name",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						},
+						{
+							"value": "department.csv",
+							"activities": [
+								{
+									"name": "Copy data2",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "azureblob_storage_with_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"contanier_name": "input",
+												"filename": {
+													"value": "@pipeline().parameters.s_file_name",
+													"type": "Expression"
+												},
+												"folder_name": "new"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "azureblob_storage_with_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"contanier_name": "project-folder",
+												"filename": {
+													"value": " ",
+													"type": "Expression"
+												},
+												"folder_name": {
+													"value": "@pipeline().parameters.tgt_folder_name",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"s_file_name": {
+				"type": "string"
+			},
+			"tgt_folder_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "New folder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-05T17:42:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

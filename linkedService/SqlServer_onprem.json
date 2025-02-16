@@ -1,0 +1,21 @@
+{
+	"name": "SqlServer_onprem",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "DESKTOP-9OVP7SU\\SQLEXPRESS",
+			"database": "Geeta",
+			"encrypt": "mandatory",
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "geeta",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJhNjRiOTMzYy00OWRjLTQ5M2UtYTkyNS1jNjc3ZDdmYzdiMDIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "integrationRuntime1",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

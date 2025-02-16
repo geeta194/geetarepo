@@ -1,0 +1,49 @@
+{
+	"name": "unique_record_load",
+	"properties": {
+		"activities": [
+			{
+				"name": "unique_record_load",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "senario5_unique_record_load",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"contanier_name": "project-folder",
+								"filename": "emp_dup.csv",
+								"folder_name": "src_folder"
+							},
+							"sink1": {
+								"contanier_name": "project-folder",
+								"filename": "emp_uniq.csv",
+								"folder_name": "tgt_folder"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "senario"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-01-30T20:42:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

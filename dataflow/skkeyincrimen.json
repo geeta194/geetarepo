@@ -1,0 +1,86 @@
+{
+	"name": "skkeyincrimen",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "tgtmaxempidskkey"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          employee_name as string,",
+				"          emp_sal as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          MAX_VALUE as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select coalesce(max(employee_id),0) as MAX_VALUE from dbo.employee_sequence_TGT\\n',",
+				"     format: 'query') ~> tgtmaxempidskkey",
+				"source1 keyGenerate(output(EMPLOYEE_ID as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1, tgtmaxempidskkey join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 derive(MAX_VALUE = MAX_VALUE+EMPLOYEE_ID) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          employee_name,",
+				"          emp_sal,",
+				"          EMPLOYEE_ID = MAX_VALUE",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

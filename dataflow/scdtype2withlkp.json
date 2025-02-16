@@ -1,0 +1,177 @@
+{
+	"name": "scdtype2withlkp",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "empsrc"
+				},
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sinkforlkp"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ls_azuresql_for_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lkptocomparesinkandsrc"
+				},
+				{
+					"name": "selecttochangecolumnname"
+				},
+				{
+					"name": "derivedinsertupdateflag"
+				},
+				{
+					"name": "splitinsertupdate"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          emp_id as integer,",
+				"          e_name as string,",
+				"          salary as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table',",
+				"     partitionBy('hash', 1)) ~> empsrc",
+				"source(output(",
+				"          sg_key as integer,",
+				"          emp_id as integer,",
+				"          e_name as string,",
+				"          salary as string,",
+				"          flag_column as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select * from emp2 where flag_column=1',",
+				"     format: 'query') ~> sinkforlkp",
+				"empsrc, sinkforlkp lookup(empsrc@emp_id == sinkforlkp@emp_id,",
+				"     multiple: true,",
+				"     partitionBy('hash', 1),",
+				"     broadcast: 'auto',",
+				"     pickup: 'any')~> lkptocomparesinkandsrc",
+				"lkptocomparesinkandsrc select(mapColumn(",
+				"          emp_id = empsrc@emp_id,",
+				"          e_name = empsrc@e_name,",
+				"          salary = empsrc@salary,",
+				"          sg_key,",
+				"          sink_emp_id = sinkforlkp@emp_id,",
+				"          sink_e_name = sinkforlkp@e_name,",
+				"          sink_salary = sinkforlkp@salary,",
+				"          flag_column",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selecttochangecolumnname",
+				"selecttochangecolumnname derive(insert_update_logic = iif(isNull(sink_emp_id),'i',iif(not(isNull(sink_emp_id)) && :md5_src!=:md5_sink,'u','')),",
+				"          md5_src := md5(e_name+salary),",
+				"          md5_sink := md5(sink_e_name+sink_salary),",
+				"     partitionBy('hash', 1)) ~> derivedinsertupdateflag",
+				"select2 split(insert_update_logic=='i' || insert_update_logic=='u',",
+				"     insert_update_logic=='u',",
+				"     disjoint: false,",
+				"     partitionBy('hash', 1)) ~> splitinsertupdate@(insert, update, default)",
+				"splitinsertupdate@update alterRow(updateIf(1==1),",
+				"     partitionBy('hash', 1)) ~> alterRow1",
+				"splitinsertupdate@insert derive(flag_column = 1,",
+				"     partitionBy('hash', 1)) ~> derivedColumn1",
+				"alterRow1 derive(flag_column = 0,",
+				"     partitionBy('hash', 1)) ~> derivedColumn2",
+				"splitinsertupdate@update select(mapColumn(",
+				"          sg_key,",
+				"          insert_update_logic",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"derivedinsertupdateflag select(mapColumn(",
+				"          emp_id,",
+				"          e_name,",
+				"          salary,",
+				"          sg_key,",
+				"          flag_column,",
+				"          insert_update_logic",
+				"     ),",
+				"     partitionBy('hash', 1),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          emp_id,",
+				"          e_name,",
+				"          flag_column",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> sink1",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['sg_key'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          sg_key = flag_column,",
+				"          flag_column",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> sink2"
+			]
+		}
+	}
+}
