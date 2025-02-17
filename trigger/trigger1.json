@@ -15,7 +15,7 @@
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Minute",
-				"interval": 3,
+				"interval": 1,
 				"startTime": "2025-02-17T18:07:00",
 				"endTime": "2025-02-18T23:20:00",
 				"timeZone": "US Mountain Standard Time"
