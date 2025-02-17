@@ -1037,12 +1037,12 @@
 								"referenceName": "azureblob_storage_with_param",
 								"type": "DatasetReference",
 								"parameters": {
-									"contanier_name": "input",
+									"contanier_name": "project-folder",
 									"filename": {
 										"value": "*.csv",
 										"type": "Expression"
 									},
-									"folder_name": "new"
+									"folder_name": "src_folder"
 								}
 							},
 							"fieldList": [
@@ -1241,6 +1241,8 @@
 								{
 									"name": "delete from src after archive",
 									"type": "Delete",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
 									"dependsOn": [
 										{
 											"activity": "archive the srcfileto arcive  pathand zip",
