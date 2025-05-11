@@ -56,6 +56,8 @@
 						{
 							"name": "copy data_onprmsql_to_azblob",
 							"type": "Copy",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
@@ -129,6 +131,8 @@
 						{
 							"name": "azblob_to_azsql",
 							"type": "Copy",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "copy data_onprmsql_to_azblob",
