@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select* from METADATA.CONTROL_TABLE where source_system='@{pipeline().parameters.SOURCE_SYSTEM}' and load_type='@{pipeline().parameters.LOAD_TYPE}'",
+							"value": "select* from dbo.CONTROL_TABLE where source_system='@{pipeline().parameters.SOURCE_SYSTEM}' and load_type='@{pipeline().parameters.LOAD_TYPE}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
