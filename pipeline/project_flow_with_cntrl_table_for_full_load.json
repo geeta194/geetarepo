@@ -56,8 +56,6 @@
 						{
 							"name": "copy data_onprmsql_to_azblob",
 							"type": "Copy",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
@@ -131,8 +129,6 @@
 						{
 							"name": "azblob_to_azsql",
 							"type": "Copy",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "copy data_onprmsql_to_azblob",
@@ -216,8 +212,6 @@
 						{
 							"name": "arcive_the_file_to_arcival_location",
 							"type": "Copy",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "azblob_to_azsql",
@@ -295,8 +289,6 @@
 						{
 							"name": "delete_file_from_blob_after_arcive",
 							"type": "Delete",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "arcive_the_file_to_arcival_location",
