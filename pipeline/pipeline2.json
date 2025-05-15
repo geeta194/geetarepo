@@ -26,7 +26,19 @@
 							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"enableStaging": false
+					"sink": {
+						"type": "OracleSink",
+						"writeBatchSize": 10000
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
@@ -46,6 +58,12 @@
 								"type": "Expression"
 							}
 						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "oracle_db_onprem_with_param",
+						"type": "DatasetReference"
 					}
 				]
 			}
