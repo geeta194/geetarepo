@@ -63,7 +63,17 @@
 				"outputs": [
 					{
 						"referenceName": "oracle_db_onprem_with_param",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"schema_name": {
+								"value": "@pipeline().parameters.schema",
+								"type": "Expression"
+							},
+							"table_name": {
+								"value": "@pipeline().parameters.table",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
@@ -76,6 +86,12 @@
 				"type": "string"
 			},
 			"folder": {
+				"type": "string"
+			},
+			"schema": {
+				"type": "string"
+			},
+			"table": {
 				"type": "string"
 			}
 		},
