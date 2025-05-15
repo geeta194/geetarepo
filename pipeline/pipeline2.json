@@ -15,10 +15,35 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
 					"enableStaging": false
-				}
+				},
+				"inputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
+		"parameters": {
+			"container": {
+				"type": "string"
+			},
+			"srcfile": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }
