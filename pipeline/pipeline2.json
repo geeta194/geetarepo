@@ -62,7 +62,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "oracledataseccore",
+						"referenceName": "OracleTable1",
 						"type": "DatasetReference"
 					}
 				]
