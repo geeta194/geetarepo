@@ -62,18 +62,8 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "oracle_db_onprem_with_param",
-						"type": "DatasetReference",
-						"parameters": {
-							"schema_name": {
-								"value": "@pipeline().parameters.schema",
-								"type": "Expression"
-							},
-							"table_name": {
-								"value": "@pipeline().parameters.table",
-								"type": "Expression"
-							}
-						}
+						"referenceName": "oracledataseccore",
+						"type": "DatasetReference"
 					}
 				]
 			}
