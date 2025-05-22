@@ -94,7 +94,8 @@
 								"sink": {
 									"type": "SqlServerSink",
 									"writeBehavior": "insert",
-									"sqlWriterUseTableLock": false
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate"
 								},
 								"enableStaging": false,
 								"translator": {
@@ -125,7 +126,11 @@
 									"referenceName": "sqlserver_db_onprem",
 									"type": "DatasetReference",
 									"parameters": {
-										"schema_name": "dbo"
+										"schema_name": "dbo",
+										"table_name": {
+											"value": "@concat(item().name,'.csv')",
+											"type": "Expression"
+										}
 									}
 								}
 							]
