@@ -92,7 +92,15 @@
 							"inputs": [
 								{
 									"referenceName": "dataset_azblob_2025",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "project-folder",
+										"folder": "src_folder",
+										"file": {
+											"value": " ",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
