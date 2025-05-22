@@ -210,7 +210,8 @@
 									"referenceName": "dataset_for_arcive",
 									"type": "DatasetReference",
 									"parameters": {
-										"container": "project-folder"
+										"container": "project-folder",
+										"folder": "DBO"
 									}
 								}
 							]
