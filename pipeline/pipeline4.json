@@ -17,7 +17,21 @@
 				"typeProperties": {
 					"dataset": {
 						"referenceName": "dataset_azblob_2025",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.container",
+								"type": "Expression"
+							},
+							"folder": {
+								"value": "@pipeline().parameters.folder",
+								"type": "Expression"
+							},
+							"file": {
+								"value": "@pipeline().parameters.file",
+								"type": "Expression"
+							}
+						}
 					},
 					"fieldList": [],
 					"storeSettings": {
@@ -30,6 +44,17 @@
 				}
 			}
 		],
+		"parameters": {
+			"container": {
+				"type": "string"
+			},
+			"folder": {
+				"type": "string"
+			},
+			"file": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "2025_senario"
 		},
