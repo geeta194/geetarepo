@@ -1,0 +1,21 @@
+{
+	"name": "dataset_azblob_2025",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage_2025",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

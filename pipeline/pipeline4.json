@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "azureblob_storage_with_param",
+						"referenceName": "dataset_azblob_2025",
 						"type": "DatasetReference"
 					},
 					"fieldList": [],
