@@ -92,13 +92,7 @@
 							"inputs": [
 								{
 									"referenceName": "dataset_azblob_2025",
-									"type": "DatasetReference",
-									"parameters": {
-										"container": {
-											"value": "@item()",
-											"type": "Expression"
-										}
-									}
+									"type": "DatasetReference"
 								}
 							]
 						}
