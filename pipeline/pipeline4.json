@@ -211,7 +211,11 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"container": "project-folder",
-										"folder": "DBO"
+										"file": {
+											"value": " ",
+											"type": "Expression"
+										},
+										"folder": "arcive"
 									}
 								}
 							]
