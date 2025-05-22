@@ -248,13 +248,18 @@
 										"filename": {
 											"value": " ",
 											"type": "Expression"
-										}
+										},
+										"folder_name": "DBO"
 									}
 								},
 								"enableLogging": true,
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
+									"wildcardFileName": {
+										"value": "@item().name",
+										"type": "Expression"
+									},
 									"enablePartitionDiscovery": false
 								}
 							}
