@@ -128,7 +128,7 @@
 									"parameters": {
 										"schema_name": "dbo",
 										"table_name": {
-											"value": "@concat(item().name,'.csv')",
+											"value": "@item().name",
 											"type": "Expression"
 										}
 									}
