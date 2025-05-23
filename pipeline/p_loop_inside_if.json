@@ -54,6 +54,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('lookingfolderlistfile').output",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "checkingfolderexistornot",
