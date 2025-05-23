@@ -60,7 +60,7 @@
 					},
 					"activities": [
 						{
-							"name": "Get Metadata1",
+							"name": "getfileinsidefolder",
 							"type": "GetMetadata",
 							"dependsOn": [],
 							"policy": {
@@ -96,6 +96,39 @@
 								},
 								"formatSettings": {
 									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "copyfile to db",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "getfileinsidefolder",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "copyfile to db",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_file_name": {
+										"value": "@activity('getfileinsidefolder').output.childItems",
+										"type": "Expression"
+									},
+									"p_folder_name": {
+										"value": "@item().folder_name",
+										"type": "Expression"
+									}
 								}
 							}
 						}
