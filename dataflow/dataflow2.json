@@ -34,7 +34,8 @@
 				"     format: 'table') ~> LISTAGG",
 				"LISTAGG aggregate(groupBy(Claimant_Name,",
 				"          Claim_Number,",
-				"          Location)) ~> aggregate1"
+				"          Location),",
+				"     Claim_Type = ERROR_FUNCTION('')) ~> aggregate1"
 			]
 		}
 	}
