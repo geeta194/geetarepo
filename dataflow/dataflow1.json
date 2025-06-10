@@ -25,14 +25,20 @@
 				}
 			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          Claim_Number as integer,",
+				"          Claimant_Name as string,",
+				"          Claim_Type as string,",
+				"          Location as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> flatten",
 				"splitfunction foldDown(unroll(),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> splitmultiplerow",
-				"flatten derive() ~> splitfunction"
+				"flatten derive(Claim_Type = ERROR_FUNCTION('')) ~> splitfunction"
 			]
 		}
 	}
