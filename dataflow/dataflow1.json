@@ -9,7 +9,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "onprem_sql",
+						"referenceName": "azuresql_dataset",
 						"type": "DatasetReference"
 					},
 					"name": "flatten"
