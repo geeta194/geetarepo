@@ -21,7 +21,7 @@
 					"name": "splitmultiplerow"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "splitfunction"
 				}
 			],
 			"scriptLines": [
@@ -29,10 +29,10 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> flatten",
-				"derivedColumn1 foldDown(unroll(),",
+				"splitfunction foldDown(unroll(),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> splitmultiplerow",
-				"flatten derive() ~> derivedColumn1"
+				"flatten derive() ~> splitfunction"
 			]
 		}
 	}
