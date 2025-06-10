@@ -35,7 +35,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> flatten",
-				"splitfunction foldDown(unroll(),",
+				"splitfunction foldDown(unroll(Claim_Type),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> splitmultiplerow",
 				"flatten derive(Claim_Type = split(Claim_Type, ',')) ~> splitfunction"
