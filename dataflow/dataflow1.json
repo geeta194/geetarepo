@@ -18,7 +18,10 @@
 			"sinks": [],
 			"transformations": [
 				{
-					"name": "flatten1"
+					"name": "splitmultiplerow"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
@@ -26,9 +29,10 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> flatten",
-				"flatten foldDown(unroll(),",
+				"derivedColumn1 foldDown(unroll(),",
 				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten1"
+				"     skipDuplicateMapOutputs: false) ~> splitmultiplerow",
+				"flatten derive() ~> derivedColumn1"
 			]
 		}
 	}
