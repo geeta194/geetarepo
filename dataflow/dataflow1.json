@@ -9,7 +9,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "azuresql_dataset",
+						"referenceName": "AzureSql_dataset_withparam",
 						"type": "DatasetReference"
 					},
 					"name": "flatten"
