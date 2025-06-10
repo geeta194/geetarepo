@@ -39,7 +39,7 @@
 				"          Claim_Number,",
 				"          Location),",
 				"     collect_Claim_Type = collect(Claim_Type)) ~> aggregate1",
-				"aggregate1 derive(collect_Claim_Type = replace(toString(collect_Claim_Type),'\"','')) ~> derivedColumn1"
+				"aggregate1 derive(collect_Claim_Type = replace(replace(replace(toString(collect_Claim_Type),'\"',''),'[',''),']','')) ~> derivedColumn1"
 			]
 		}
 	}
