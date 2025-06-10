@@ -38,7 +38,7 @@
 				"splitfunction foldDown(unroll(),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> splitmultiplerow",
-				"flatten derive(Claim_Type = ERROR_FUNCTION('')) ~> splitfunction"
+				"flatten derive(Claim_Type = split(Claim_Type, ',')) ~> splitfunction"
 			]
 		}
 	}
