@@ -12,16 +12,21 @@
 						"referenceName": "AzureSql_dataset_withparam",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "LISTAGG"
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> source1"
+				"     format: 'table') ~> LISTAGG",
+				"LISTAGG derive() ~> derivedColumn1"
 			]
 		}
 	}
