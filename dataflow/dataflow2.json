@@ -22,11 +22,19 @@
 				}
 			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          Claim_Number as integer,",
+				"          Claimant_Name as string,",
+				"          Claim_Type as string,",
+				"          Location as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> LISTAGG",
-				"LISTAGG aggregate() ~> aggregate1"
+				"LISTAGG aggregate(groupBy(Claimant_Name,",
+				"          Claim_Number,",
+				"          Location)) ~> aggregate1"
 			]
 		}
 	}
