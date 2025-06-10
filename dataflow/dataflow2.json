@@ -18,7 +18,7 @@
 			"sinks": [],
 			"transformations": [
 				{
-					"name": "derivedColumn1"
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -26,7 +26,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> LISTAGG",
-				"LISTAGG derive(collect_claimtype = ERROR_FUNCTION('')) ~> derivedColumn1"
+				"LISTAGG aggregate() ~> aggregate1"
 			]
 		}
 	}
