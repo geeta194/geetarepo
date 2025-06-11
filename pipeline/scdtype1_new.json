@@ -21,7 +21,20 @@
 						"datasetParameters": {
 							"claimfile": {
 								"contanier_name": "project-folder",
-								"filename": "claim_src_data.csv"
+								"filename": "claim_src_data.csv",
+								"folder_name": "src_folder"
+							},
+							"lkpontgt": {
+								"table_name": "claim_tgt_scd1data",
+								"schema_name": "dbo"
+							},
+							"insertclaim": {
+								"table_name": "claim_tgt_scd1data",
+								"schema_name": "dbo"
+							},
+							"updsink": {
+								"table_name": "claim_tgt_scd1data",
+								"schema_name": "dbo"
 							}
 						}
 					},
