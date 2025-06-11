@@ -1,5 +1,5 @@
 {
-	"name": "scdtype1_new",
+	"name": "df_scdtype1_new",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
