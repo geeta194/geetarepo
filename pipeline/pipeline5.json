@@ -22,6 +22,10 @@
 							"flatten": {
 								"table_name": "FLATTEN_TRANSFORMATION",
 								"schema_name": "DBO"
+							},
+							"sink1": {
+								"table_name": "ROW",
+								"schema_name": "DBO"
 							}
 						}
 					},
