@@ -12,6 +12,10 @@
 					"name": "claimfile"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
 					"name": "lkpontgt"
 				}
 			],
@@ -36,8 +40,10 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> claimfile",
 				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> lkpontgt",
-				"claimfile lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> lkpontgt",
+				"lkpontgt lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lkpinsertorupd"
