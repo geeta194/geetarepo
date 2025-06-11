@@ -20,6 +20,7 @@
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"flatten": {
+								"table_name": "FLATTEN_TRANSFORMATION",
 								"schema_name": "DBO"
 							}
 						}
