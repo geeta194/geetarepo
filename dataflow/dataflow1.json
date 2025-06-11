@@ -15,7 +15,11 @@
 					"name": "flatten"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "splitmultiplerow"
@@ -37,14 +41,18 @@
 				"     format: 'table') ~> flatten",
 				"splitfunction foldDown(unroll(Claim_Type),",
 				"     mapColumn(",
-				"          Claim_Type = Claim_Type,",
+				"          Claim_Type,",
 				"          Claim_Number,",
 				"          Claimant_Name,",
 				"          Location",
 				"     ),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> splitmultiplerow",
-				"flatten derive(Claim_Type = split(Claim_Type, ',')) ~> splitfunction"
+				"flatten derive(Claim_Type = split(Claim_Type, ',')) ~> splitfunction",
+				"splitmultiplerow sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
