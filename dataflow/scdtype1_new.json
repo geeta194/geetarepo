@@ -83,7 +83,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(insert_update_logic = ERROR_FUNCTION('')) ~> derivedColumn1"
+				"select1 derive(insert_update_logic = iif(isNull(lkp_Claim_number),'i','u')) ~> derivedColumn1"
 			]
 		}
 	}
