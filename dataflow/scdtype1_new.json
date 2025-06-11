@@ -13,7 +13,11 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "lkpinsertorupd"
+				}
+			],
 			"scriptLines": [
 				"parameters{",
 				"     container_name as string,",
@@ -35,7 +39,11 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> claimfile"
+				"     ignoreNoFilesFound: false) ~> claimfile",
+				"claimfile lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lkpinsertorupd"
 			]
 		}
 	}
