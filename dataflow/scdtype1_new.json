@@ -25,7 +25,7 @@
 					"name": "lkpinsertorupd"
 				},
 				{
-					"name": "select1"
+					"name": "renamecolumnnamebasedonincommingstream"
 				},
 				{
 					"name": "derivedColumn1"
@@ -85,8 +85,8 @@
 				"          lkp_insurance_number = lkpontgt@insurance_number",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(insert_update_logic = iif(isNull(lkp_Claim_number),'i','u')) ~> derivedColumn1",
+				"     skipDuplicateMapOutputs: true) ~> renamecolumnnamebasedonincommingstream",
+				"renamecolumnnamebasedonincommingstream derive(insert_update_logic = iif(isNull(lkp_Claim_number),'i','u')) ~> derivedColumn1",
 				"derivedColumn1 select(mapColumn(",
 				"          Claim_number,",
 				"          incident_number,",
