@@ -29,7 +29,9 @@
 					"sink": {
 						"type": "AzureSqlSink",
 						"writeBehavior": "insert",
-						"sqlWriterUseTableLock": false
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
 					"translator": {
@@ -57,6 +59,7 @@
 						"referenceName": "AzureSql_dataset_withparam",
 						"type": "DatasetReference",
 						"parameters": {
+							"table_name": "claim_tgt_scd1data",
 							"schema_name": "dbo"
 						}
 					}
