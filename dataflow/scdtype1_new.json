@@ -34,7 +34,7 @@
 					"name": "selectrequiredcolumn"
 				},
 				{
-					"name": "split1"
+					"name": "splitinsertupdate"
 				}
 			],
 			"scriptLines": [
@@ -105,8 +105,8 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> selectrequiredcolumn",
 				"selectrequiredcolumn split(insert_update_logic=='i',",
-				"     ERROR_FUNCTION(''),",
-				"     disjoint: false) ~> split1@(insert, update, )"
+				"     insert_update_logic=='u',",
+				"     disjoint: false) ~> splitinsertupdate@(insert, update, )"
 			]
 		}
 	}
