@@ -3,8 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Data flow1",
-				"type": "ExecuteDataFlow",
+				"name": "Copy data1",
+				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -15,31 +15,30 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataflow": {
-						"referenceName": "dataflow1",
-						"type": "DataFlowReference",
-						"datasetParameters": {
-							"flatten": {
-								"table_name": "FLATTEN_TRANSFORMATION",
-								"schema_name": "DBO"
-							},
-							"sink1": {
-								"table_name": "tgt_aftersplitrowvalue_flaten",
-								"schema_name": "DBO"
-							}
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "azureblob_storage_with_param",
+						"type": "DatasetReference",
+						"parameters": {
+							"contanier_name": "project-folder"
+						}
+					}
+				]
 			}
 		],
-		"folder": {
-			"name": "2025_senario"
-		},
 		"annotations": []
 	}
 }
