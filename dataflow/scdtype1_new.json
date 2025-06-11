@@ -28,7 +28,7 @@
 					"name": "insertclaim"
 				},
 				{
-					"name": "sink2"
+					"name": "updsink"
 				}
 			],
 			"transformations": [
@@ -46,6 +46,9 @@
 				},
 				{
 					"name": "splitinsertupdate"
+				},
+				{
+					"name": "alterRow1"
 				}
 			],
 			"scriptLines": [
@@ -118,6 +121,7 @@
 				"selectrequiredcolumn split(insert_update_logic=='i',",
 				"     insert_update_logic=='u',",
 				"     disjoint: false) ~> splitinsertupdate@(insert, update, )",
+				"splitinsertupdate@update alterRow() ~> alterRow1",
 				"splitinsertupdate@insert sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
@@ -128,10 +132,10 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError') ~> insertclaim",
-				"splitinsertupdate@update sink(allowSchemaDrift: true,",
+				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink2"
+				"     skipDuplicateMapOutputs: true) ~> updsink"
 			]
 		}
 	}
