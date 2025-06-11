@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "scdtype1_new",
+						"referenceName": "df_scdtype1_new",
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"claimfile": {
