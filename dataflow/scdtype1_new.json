@@ -19,7 +19,18 @@
 					"name": "lkpontgt"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "insertclaim"
+				},
+				{
+					"name": "sink2"
+				}
+			],
 			"transformations": [
 				{
 					"name": "lkpinsertorupd"
@@ -106,7 +117,21 @@
 				"     skipDuplicateMapOutputs: true) ~> selectrequiredcolumn",
 				"selectrequiredcolumn split(insert_update_logic=='i',",
 				"     insert_update_logic=='u',",
-				"     disjoint: false) ~> splitinsertupdate@(insert, update, )"
+				"     disjoint: false) ~> splitinsertupdate@(insert, update, )",
+				"splitinsertupdate@insert sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> insertclaim",
+				"splitinsertupdate@update sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2"
 			]
 		}
 	}
