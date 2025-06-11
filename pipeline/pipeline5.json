@@ -24,7 +24,7 @@
 								"schema_name": "DBO"
 							},
 							"sink1": {
-								"table_name": "ROW",
+								"table_name": "tgt",
 								"schema_name": "DBO"
 							}
 						}
