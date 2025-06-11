@@ -31,7 +31,7 @@
 					"name": "derivedColumn1"
 				},
 				{
-					"name": "select2"
+					"name": "selectrequiredcolumn"
 				}
 			],
 			"scriptLines": [
@@ -100,7 +100,7 @@
 				"          insert_update_logic",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2"
+				"     skipDuplicateMapOutputs: true) ~> selectrequiredcolumn"
 			]
 		}
 	}
