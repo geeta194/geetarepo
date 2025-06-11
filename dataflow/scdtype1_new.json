@@ -26,6 +26,9 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
@@ -79,7 +82,8 @@
 				"          lkp_insurance_number = lkpontgt@insurance_number",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(insert_update_logic = ERROR_FUNCTION('')) ~> derivedColumn1"
 			]
 		}
 	}
