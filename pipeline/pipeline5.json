@@ -24,7 +24,7 @@
 								"schema_name": "DBO"
 							},
 							"sink1": {
-								"table_name": "tgt",
+								"table_name": "tgt_aftersplitrowvalue_flaten",
 								"schema_name": "DBO"
 							}
 						}
