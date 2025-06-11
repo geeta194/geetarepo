@@ -29,6 +29,9 @@
 				},
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "select2"
 				}
 			],
 			"scriptLines": [
@@ -83,7 +86,24 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(insert_update_logic = iif(isNull(lkp_Claim_number),'i','u')) ~> derivedColumn1"
+				"select1 derive(insert_update_logic = iif(isNull(lkp_Claim_number),'i','u')) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          Claim_number,",
+				"          incident_number,",
+				"          claimant_name,",
+				"          claimant_address,",
+				"          payment_type,",
+				"          claim_amount,",
+				"          Insurance_type,",
+				"          insurance_number,",
+				"          lkp_Claim_number,",
+				"          lkp_claim_amount,",
+				"          lkp_Insurance_type,",
+				"          lkp_insurance_number,",
+				"          insert_update_logic",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2"
 			]
 		}
 	}
