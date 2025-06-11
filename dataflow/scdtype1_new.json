@@ -28,6 +28,10 @@
 					"name": "insertclaim"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
 					"name": "updsink"
 				}
 			],
@@ -46,9 +50,6 @@
 				},
 				{
 					"name": "splitinsertupdate"
-				},
-				{
-					"name": "alterRow1"
 				}
 			],
 			"scriptLines": [
@@ -121,7 +122,6 @@
 				"selectrequiredcolumn split(insert_update_logic=='i',",
 				"     insert_update_logic=='u',",
 				"     disjoint: false) ~> splitinsertupdate@(insert, update, )",
-				"splitinsertupdate@update alterRow() ~> alterRow1",
 				"splitinsertupdate@insert sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
@@ -132,10 +132,16 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError') ~> insertclaim",
-				"alterRow1 sink(allowSchemaDrift: true,",
+				"splitinsertupdate@update sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> updsink"
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> updsink"
 			]
 		}
 	}
