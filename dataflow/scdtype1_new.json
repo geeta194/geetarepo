@@ -10,6 +10,9 @@
 						"type": "DatasetReference"
 					},
 					"name": "claimfile"
+				},
+				{
+					"name": "lkpontgt"
 				}
 			],
 			"sinks": [],
@@ -32,6 +35,8 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> claimfile",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> lkpontgt",
 				"claimfile lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     multiple: false,",
 				"     pickup: 'any',",
