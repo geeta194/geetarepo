@@ -125,7 +125,7 @@
 				"selectrequiredcolumn split(insert_update_logic=='i',",
 				"     insert_update_logic=='u',",
 				"     disjoint: false) ~> splitinsertupdate@(insert, update, )",
-				"splitinsertupdate@update alterRow() ~> alterRow1",
+				"splitinsertupdate@update alterRow(updateIf(insert_update_logic=='u')) ~> alterRow1",
 				"splitinsertupdate@insert sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
