@@ -19,11 +19,6 @@
 				}
 			],
 			"scriptLines": [
-				"parameters{",
-				"     container_name as string,",
-				"     folder_name as string,",
-				"     file_name as string",
-				"}",
 				"source(output(",
 				"          EMPLOYEE_ID as string,",
 				"          FIRST_NAME as string,",
