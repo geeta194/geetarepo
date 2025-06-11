@@ -53,7 +53,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> lkpontgt",
-				"claimfile, lkpontgt lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"claimfile, lkpontgt lookup(claimfile@Claim_number == lkpontgt@Claim_number,",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lkpinsertorupd"
