@@ -151,13 +151,17 @@
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
 				"     upsertable:false,",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> updtgt"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          sk_key,",
+				"          Active_flag = upd_active_flag",
+				"     )) ~> updtgt"
 			]
 		}
 	}
