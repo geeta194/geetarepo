@@ -26,6 +26,9 @@
 			"transformations": [
 				{
 					"name": "lookup1"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
@@ -58,10 +61,11 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> lkptgt",
-				"source1, lkptgt lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"source1, lkptgt lookup(source1@Claim_number == lkptgt@Claim_number,",
 				"     multiple: false,",
 				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookup1"
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 derive() ~> derivedColumn1"
 			]
 		}
 	}
