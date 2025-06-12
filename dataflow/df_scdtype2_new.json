@@ -154,6 +154,7 @@
 				"     insertable:false,",
 				"     updateable:true,",
 				"     upsertable:false,",
+				"     keys:['sk_key'],",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
