@@ -89,7 +89,7 @@
 				"          insurance_number = source1@insurance_number,",
 				"          Claim_number = lkptgt@Claim_number,",
 				"          sk_key,",
-				"          v_instr_logic = v_instr_ubdate_logic",
+				"          v_instr_update_logic = v_instr_ubdate_logic",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> selectRequiredcolumn"
