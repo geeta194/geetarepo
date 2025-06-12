@@ -59,6 +59,9 @@
 				},
 				{
 					"name": "alterRow1"
+				},
+				{
+					"name": "surrogateKeygenerate"
 				}
 			],
 			"scriptLines": [
@@ -118,9 +121,12 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"split1@insert derive(ins_activeflag = 'Y') ~> derivedColumnActiveflaglogic",
+				"surrogateKeygenerate derive(ins_activeflag = 'Y') ~> derivedColumnActiveflaglogic",
 				"split1@update derive(upd_active_flag = 'N') ~> derivedColumnActivflagNlogic",
 				"derivedColumnActivflagNlogic alterRow(updateIf(1==1)) ~> alterRow1",
+				"split1@insert keyGenerate(output(sk_key as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKeygenerate",
 				"derivedColumnActiveflaglogic sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
