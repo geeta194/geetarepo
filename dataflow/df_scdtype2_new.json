@@ -15,6 +15,10 @@
 					"name": "source1"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
 					"name": "lkptgt"
 				}
 			],
@@ -38,8 +42,22 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source1",
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> lkptgt",
+				"source(output(",
+				"          Claim_number as string,",
+				"          incident_number as string,",
+				"          claimant_name as string,",
+				"          claimant_address as string,",
+				"          payment_type as string,",
+				"          claim_amount as string,",
+				"          Insurance_type as string,",
+				"          insurance_number as string,",
+				"          sk_key as integer,",
+				"          Active_flag as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> lkptgt",
 				"source1, lkptgt lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     multiple: false,",
 				"     pickup: 'any',",
