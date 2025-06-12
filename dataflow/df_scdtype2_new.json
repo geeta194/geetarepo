@@ -154,17 +154,8 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
-				"          Claim_number,",
-				"          incident_number,",
-				"          claimant_name,",
-				"          claimant_address,",
-				"          payment_type,",
-				"          claim_amount,",
-				"          Insurance_type,",
-				"          insurance_number,",
 				"          sk_key,",
-				"          v_instr_ubdate_logic,",
-				"          active_flag = upd_active_flag",
+				"          { Active_flag} = upd_active_flag",
 				"     )) ~> updtgt"
 			]
 		}
