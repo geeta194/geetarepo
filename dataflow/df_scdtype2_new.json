@@ -35,6 +35,9 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "derivedColumnActiveflaglogic"
 				}
 			],
 			"scriptLines": [
@@ -92,7 +95,8 @@
 				"          v_instr_ubdate_logic",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"split1@insert derive({} = ERROR_FUNCTION('')) ~> derivedColumnActiveflaglogic"
 			]
 		}
 	}
