@@ -96,7 +96,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"split1@insert derive({} = ERROR_FUNCTION('')) ~> derivedColumnActiveflaglogic"
+				"split1@insert derive(ins_activeflag = 'Y') ~> derivedColumnActiveflaglogic"
 			]
 		}
 	}
