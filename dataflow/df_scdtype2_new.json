@@ -65,7 +65,7 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup1",
-				"lookup1 derive() ~> derivedColumn1"
+				"lookup1 derive(md5 = ERROR_FUNCTION('')) ~> derivedColumn1"
 			]
 		}
 	}
