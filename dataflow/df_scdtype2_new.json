@@ -31,7 +31,11 @@
 					"name": "insTgt"
 				},
 				{
-					"name": "sink1"
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "updtgt"
 				}
 			],
 			"transformations": [
@@ -140,8 +144,14 @@
 				"     )) ~> insTgt",
 				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> updtgt"
 			]
 		}
 	}
