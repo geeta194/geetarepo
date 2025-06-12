@@ -28,7 +28,7 @@
 						"referenceName": "AzureSql_dataset_withparam",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "insTgt"
 				}
 			],
 			"transformations": [
@@ -114,7 +114,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError') ~> insTgt"
 			]
 		}
 	}
