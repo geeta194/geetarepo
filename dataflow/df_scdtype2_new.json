@@ -108,7 +108,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"split1@insert derive(ins_activeflag = 'Y') ~> derivedColumnActiveflaglogic",
-				"split1@update derive(acti = ERROR_FUNCTION('')) ~> derivedColumnActivflagNlogic",
+				"split1@update derive(upd_active_flag = 'N') ~> derivedColumnActivflagNlogic",
 				"derivedColumnActiveflaglogic sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
