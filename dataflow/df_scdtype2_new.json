@@ -46,6 +46,9 @@
 				},
 				{
 					"name": "derivedColumnActiveflaglogic"
+				},
+				{
+					"name": "derivedColumnActivflagNlogic"
 				}
 			],
 			"scriptLines": [
@@ -105,6 +108,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"split1@insert derive(ins_activeflag = 'Y') ~> derivedColumnActiveflaglogic",
+				"split1@update derive(acti = ERROR_FUNCTION('')) ~> derivedColumnActivflagNlogic",
 				"derivedColumnActiveflaglogic sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
