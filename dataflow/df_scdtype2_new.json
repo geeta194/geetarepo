@@ -28,7 +28,7 @@
 					"name": "lookup1"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "insertUpdateLogic"
 				}
 			],
 			"scriptLines": [
@@ -65,7 +65,7 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup1",
-				"lookup1 derive(v_instr_logic = ERROR_FUNCTION('')) ~> derivedColumn1"
+				"lookup1 derive(v_instr_logic = ERROR_FUNCTION('')) ~> insertUpdateLogic"
 			]
 		}
 	}
