@@ -88,7 +88,6 @@
 				"          insurance_number = source1@insurance_number,",
 				"          Claim_number = lkptgt@Claim_number,",
 				"          sk_key,",
-				"          Active_flag,",
 				"          v_instr_logic",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
