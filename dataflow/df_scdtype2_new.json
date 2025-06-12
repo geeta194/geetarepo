@@ -114,7 +114,19 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> insTgt"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Claim_number,",
+				"          incident_number,",
+				"          claimant_name,",
+				"          claimant_address,",
+				"          payment_type,",
+				"          claim_amount,",
+				"          Insurance_type,",
+				"          insurance_number,",
+				"          sk_key,",
+				"          Active_flag = ins_activeflag",
+				"     )) ~> insTgt"
 			]
 		}
 	}
