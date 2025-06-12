@@ -66,8 +66,8 @@
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup1",
 				"lookup1 derive(v_instr_logic = ERROR_FUNCTION(''),",
-				"          src_md5 = md5(source1@incident_number,source1@claimant_name,source1@claimant_addresssource1@payment_type,source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
-				"          src_md5 := md5(source1@incident_number,source1@claimant_name,source1@claimant_addresssource1@payment_type,source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
+				"          src_md5 = src_md5(source1@incident_number,source1@claimant_name,source1@claimant_addresssource1@payment_type,source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
+				"          src_md5 := md5(source1@incident_number,source1@claimant_name,source1@claimant_address,source1@payment_type,source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
 				"          tgt_md5 := md5(lkptgt@incident_number,lkptgt@claimant_name,lkptgt@claimant_address,lkptgt@payment_type,lkptgt@claim_amount,lkptgt@Insurance_type,lkptgt@insurance_number)\r",
 				") ~> insertUpdateLogic"
 			]
