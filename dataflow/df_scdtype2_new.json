@@ -65,7 +65,8 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup1",
-				"lookup1 derive(v_instr_logic = ERROR_FUNCTION('')) ~> insertUpdateLogic"
+				"lookup1 derive(v_instr_logic = md5(source1@incident_number,source1@claimant_name,source1@claimant_addresssource1@payment_type,source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
+				"          column1 = ERROR_FUNCTION('')) ~> insertUpdateLogic"
 			]
 		}
 	}
