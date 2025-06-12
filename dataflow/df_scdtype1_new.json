@@ -1,6 +1,9 @@
 {
 	"name": "df_scdtype1_new",
 	"properties": {
+		"folder": {
+			"name": "New_2025"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
