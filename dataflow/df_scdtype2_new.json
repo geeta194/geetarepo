@@ -71,7 +71,7 @@
 				"          claimant_name as string,",
 				"          claimant_address as string,",
 				"          payment_type as string,",
-				"          claim_amount as integer,",
+				"          claim_amount as string,",
 				"          Insurance_type as string,",
 				"          insurance_number as string",
 				"     ),",
