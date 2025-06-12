@@ -29,6 +29,9 @@
 						"type": "DatasetReference"
 					},
 					"name": "insTgt"
+				},
+				{
+					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -49,6 +52,9 @@
 				},
 				{
 					"name": "derivedColumnActivflagNlogic"
+				},
+				{
+					"name": "alterRow1"
 				}
 			],
 			"scriptLines": [
@@ -109,6 +115,7 @@
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"split1@insert derive(ins_activeflag = 'Y') ~> derivedColumnActiveflaglogic",
 				"split1@update derive(upd_active_flag = 'N') ~> derivedColumnActivflagNlogic",
+				"derivedColumnActivflagNlogic alterRow(updateIf(1==1)) ~> alterRow1",
 				"derivedColumnActiveflaglogic sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
@@ -130,7 +137,11 @@
 				"          insurance_number,",
 				"          sk_key,",
 				"          Active_flag = ins_activeflag",
-				"     )) ~> insTgt"
+				"     )) ~> insTgt",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
