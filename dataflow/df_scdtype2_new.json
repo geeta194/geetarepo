@@ -65,7 +65,7 @@
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookup1",
-				"lookup1 derive(v_instr_logic = iif(isNull(lkptgt@Claim_number),'i',iif(! isNull(lkptgt@Claim_number) && :src_md5!=:tgt_md5),'u'),",
+				"lookup1 derive(v_instr_logic = iif(isNull(lkptgt@Claim_number),'i',iif(! isNull(lkptgt@Claim_number) && :src_md5!=:tgt_md5,'u','')),",
 				"          src_md5 := md5(source1@incident_number,source1@claimant_name,source1@claimant_address,source1@payment_type,source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
 				"          tgt_md5 := md5(lkptgt@incident_number,lkptgt@claimant_name,lkptgt@claimant_address,lkptgt@payment_type,lkptgt@claim_amount,lkptgt@Insurance_type,lkptgt@insurance_number)\r",
 				") ~> insertUpdateLogic"
