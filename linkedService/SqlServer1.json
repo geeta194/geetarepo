@@ -6,12 +6,12 @@
 		"type": "SqlServer",
 		"typeProperties": {
 			"server": "LAPTOP-0Q3S5CJC\\SQLEXPRESS",
-			"database": "Geeta",
+			"database": "master",
 			"encrypt": "mandatory",
-			"trustServerCertificate": false,
-			"authenticationType": "Windows",
-			"userName": "LAPTOP-0Q3S5CJC\\geeta",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiYzVjNDUwZi0yYmMyLTRjZDMtOWEyNi0yNGI1MTEyOGExZDUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "sa",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI5Zjg5MTM5ZC05MDRiLTQxODMtYjVkNi1iNjA0OTA1MmRhZTMiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "integrationRuntime2",
