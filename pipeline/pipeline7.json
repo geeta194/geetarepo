@@ -25,11 +25,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"table_name": {
-								"value": "@pipeline().parameters.table",
+								"value": "@pipeline().parameters.table_name",
 								"type": "Expression"
 							},
 							"schema_name": {
-								"value": "@pipeline().parameters.schema",
+								"value": "@pipeline().parameters.schema_name",
 								"type": "Expression"
 							}
 						}
@@ -58,6 +58,8 @@
 						{
 							"name": "Copy data1",
 							"type": "Copy",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
