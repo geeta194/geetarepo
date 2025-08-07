@@ -15,11 +15,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().file",
-					"type": "Expression"
-				},
-				"fileSystem": "arcive"
+				"folderPath": "new",
+				"fileSystem": "project-folder"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
