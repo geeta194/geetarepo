@@ -130,19 +130,10 @@
 			}
 		],
 		"parameters": {
-			"schema": {
+			"table_name": {
 				"type": "string"
 			},
-			"table": {
-				"type": "string"
-			},
-			"container": {
-				"type": "string"
-			},
-			"folder": {
-				"type": "string"
-			},
-			"file": {
+			"schema_name": {
 				"type": "string"
 			}
 		},
