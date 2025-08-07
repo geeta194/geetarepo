@@ -2,7 +2,7 @@
 	"name": "onprem_sql",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "SqlServer_onprem",
+			"referenceName": "SqlServer1",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
