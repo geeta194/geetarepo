@@ -1,0 +1,54 @@
+{
+	"name": "p_incr_load",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup_on_cntrolTable_for_incr_typetable",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "@select *from [metadata].[control_table_Batch_001] where load_type='@{pipeline().parameters.LOAD_TYPE}' \nand is_active='Y' and SOURCE_SYSTEM='@{pipeline().parameters.SOURCE_SYSTEM}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "control_table_Batch_001",
+							"schema_name": "metadata"
+						}
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"SOURCE_SYSTEM": {
+				"type": "string",
+				"defaultValue": "SQL_SERVER"
+			},
+			"LOAD_TYPE": {
+				"type": "string",
+				"defaultValue": "incr"
+			}
+		},
+		"folder": {
+			"name": "new2025"
+		},
+		"annotations": []
+	}
+}
