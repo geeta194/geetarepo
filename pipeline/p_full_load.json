@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookuptofetchmetadata",
+				"name": "Lookup_contrl_table_forfullload",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -17,6 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select *from [metadata].[control_table_Batch_001] where load_type='@{pipeline().parameters.load_type}' and is_active='Y' and SOURCE_SYSTEM='@{pipeline().parameters.src_system}'",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -24,119 +28,21 @@
 						"referenceName": "AzureSql_dataset_withparam",
 						"type": "DatasetReference",
 						"parameters": {
-							"table_name": {
-								"value": "@pipeline().parameters.table_name",
-								"type": "Expression"
-							},
-							"schema_name": {
-								"value": "@pipeline().parameters.schema_name",
-								"type": "Expression"
-							}
+							"table_name": "control_table_Batch_001",
+							"schema_name": "metadata"
 						}
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "processcntrltablevalue",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "Lookuptofetchmetadata",
-						"dependencyConditions": [
-							"Succeeded"
-						]
 					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('Lookuptofetchmetadata').output.value",
-						"type": "Expression"
-					},
-					"activities": [
-						{
-							"name": "Copy data1",
-							"type": "Copy",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "SqlServerSource",
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								},
-								"sink": {
-									"type": "DelimitedTextSink",
-									"storeSettings": {
-										"type": "AzureBlobStorageWriteSettings"
-									},
-									"formatSettings": {
-										"type": "DelimitedTextWriteSettings",
-										"quoteAllText": true,
-										"fileExtension": ".txt"
-									}
-								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
-							},
-							"inputs": [
-								{
-									"referenceName": "onprem_sql",
-									"type": "DatasetReference",
-									"parameters": {
-										"schema_name": {
-											"value": "@item().SOURCE_SCHEMA",
-											"type": "Expression"
-										},
-										"table_name": {
-											"value": "@item().SOURCE_TABLE",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "dataset_azblob_2025",
-									"type": "DatasetReference",
-									"parameters": {
-										"container": "project-folder",
-										"folder": "@item().SOURCE_SCHEMA",
-										"file": {
-											"value": "@concat(item().SOURCE_TABLE,'.csv')",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					]
 				}
 			}
 		],
 		"parameters": {
-			"table_name": {
-				"type": "string"
+			"src_system": {
+				"type": "string",
+				"defaultValue": "SQL_SERVER"
 			},
-			"schema_name": {
-				"type": "string"
+			"load_type": {
+				"type": "string",
+				"defaultValue": "full"
 			}
 		},
 		"folder": {
