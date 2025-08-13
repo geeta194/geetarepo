@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "@select *from [metadata].[control_table_Batch_001] where load_type='@{pipeline().parameters.LOAD_TYPE}' \nand is_active='Y' and SOURCE_SYSTEM='@{pipeline().parameters.SOURCE_SYSTEM}'",
+							"value": "select *from [metadata].[control_table_Batch_001] where load_type='@{pipeline().parameters.LOAD_TYPE}' \nand is_active='Y' and SOURCE_SYSTEM='@{pipeline().parameters.SOURCE_SYSTEM}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -33,6 +33,68 @@
 						}
 					},
 					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach_to_process_Incr_table",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup_on_cntrolTable_for_incr_typetable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup_on_cntrolTable_for_incr_typetable').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy dataFromsrconpremsqlToAdlsstorage",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "select * from @{item().SOURCE_SCHEMA}.@{item().SOURCE_TABLE} where @{item().WATERMARK_COLUMN}> @{item().WATERMARK_COLUM_VALUE}\n\n\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "sqlserver_db_onprem",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema_name": {
+											"value": " ",
+											"type": "Expression"
+										},
+										"table_name": {
+											"value": " ",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
 				}
 			}
 		],
