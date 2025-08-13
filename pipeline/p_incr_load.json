@@ -69,7 +69,7 @@
 								"source": {
 									"type": "SqlServerSource",
 									"sqlReaderQuery": {
-										"value": "select * from @{item().SOURCE_SCHEMA}.@{item().SOURCE_TABLE} where @{item().WATERMARK_COLUMN}> @{item().WATERMARK_COLUM_VALUE}\n\n\n",
+										"value": "select * from @{item().SOURCE_SCHEMA}.@{item().SOURCE_TABLE} where @{item().WATERMARK_COLUMN}> cast( @{item().WATERMARK_COLUM_VALUE})",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
