@@ -292,7 +292,7 @@
 											"type": "Expression"
 										},
 										"folder": {
-											"value": "@item().SOURCE_SCHEMA",
+											"value": "arcive",
 											"type": "Expression"
 										}
 									}
@@ -370,7 +370,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "update [metadata].[control_table_Batch_001] set WATERMARK_COLUM_VALUE= utcNow() where SOURCE_SYSTEM=@{item().SOURCE_SYSTEM} and \t\nLOAD_TYPE=@{item().LOAD_TYPE} and SOURCE_SCHEMA=@{item().SOURCE_SCHEMA} and SOURCE_TABLE=@{item().SOURCE_TABLE}",
+											"value": "update [metadata].[control_table_Batch_001] set WATERMARK_COLUM_VALUE= getdate() where SOURCE_SYSTEM=@{item().SOURCE_SYSTEM} and \t\nLOAD_TYPE=@{item().LOAD_TYPE} and SOURCE_SCHEMA=@{item().SOURCE_SCHEMA} and SOURCE_TABLE=@{item().SOURCE_TABLE}",
 											"type": "Expression"
 										}
 									}
