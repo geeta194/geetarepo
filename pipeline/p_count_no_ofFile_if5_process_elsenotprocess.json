@@ -84,28 +84,12 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"message": "file count is now 4",
+								"message": "file count is not 4",
 								"errorCode": "1000"
 							}
 						}
 					],
 					"ifTrueActivities": [
-						{
-							"name": "Execute Pipeline1",
-							"type": "ExecutePipeline",
-							"dependsOn": [],
-							"policy": {
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "p_copy_iftrue_countfile_is_4",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true
-							}
-						},
 						{
 							"name": "Execute Pipeline1_copy1",
 							"type": "ExecutePipeline",
