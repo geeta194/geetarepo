@@ -123,7 +123,7 @@
 											"value": "@item().name",
 											"type": "Expression"
 										},
-										"folder_name": "new1"
+										"folder_name": "new"
 									}
 								}
 							]
