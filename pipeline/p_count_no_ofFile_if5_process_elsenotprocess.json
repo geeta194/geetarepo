@@ -84,7 +84,7 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"message": "codition is false",
+								"message": "file count is now 4",
 								"errorCode": "1000"
 							}
 						}
