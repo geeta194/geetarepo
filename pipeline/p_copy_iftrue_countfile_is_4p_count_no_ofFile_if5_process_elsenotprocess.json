@@ -1,5 +1,5 @@
 {
-	"name": "p_copy_iftrue_countfile_is_4",
+	"name": "p_copy_iftrue_countfile_is_4p_count_no_ofFile_if5_process_elsenotprocess",
 	"properties": {
 		"activities": [
 			{
@@ -60,8 +60,6 @@
 						{
 							"name": "Copy data1",
 							"type": "Copy",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
