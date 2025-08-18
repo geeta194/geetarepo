@@ -77,9 +77,37 @@
 						"value": "@equals(variables('no_of_file'),4)",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "Fail1",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "codition is false",
+								"errorCode": "1000"
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
 							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_copy_iftrue_countfile_is_4",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "Execute Pipeline1_copy1",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"policy": {
