@@ -68,7 +68,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"container": "arcive",
-							"file": "customer.csv"
+							"file": "customer.csv",
+							"folder": {
+								"value": " ",
+								"type": "Expression"
+							}
 						}
 					}
 				]
