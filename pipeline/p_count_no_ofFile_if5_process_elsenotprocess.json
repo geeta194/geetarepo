@@ -75,7 +75,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(variables('no_of_file'),4)",
+						"value": "@equals(variables('no_of_file'),3)",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
