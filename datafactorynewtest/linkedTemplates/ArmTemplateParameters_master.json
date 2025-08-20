@@ -11,6 +11,9 @@
 		"AzureBlobStorage5_connectionString": {
 			"value": ""
 		},
+		"AzureBlobStorage_2025_connectionString": {
+			"value": ""
+		},
 		"AzureDataLakeStorage1_accountKey": {
 			"value": ""
 		},
@@ -18,6 +21,12 @@
 			"value": ""
 		},
 		"Oracle_core_schema_connectionString": {
+			"value": ""
+		},
+		"Oracle_new_connectionString": {
+			"value": ""
+		},
+		"SqlServer1_password": {
 			"value": ""
 		},
 		"SqlServer_onprem_password": {
@@ -44,6 +53,12 @@
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"value": "https://staccoungtest.dfs.core.windows.net/"
 		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://secretkeynew1.vault.azure.net/"
+		},
+		"AzureKeyVault2_properties_typeProperties_baseUrl": {
+			"value": "https://secretkeynew1.vault.azure.net/"
+		},
 		"AzureSqlDatabase1_properties_typeProperties_server": {
 			"value": "azureservernew1.database.windows.net"
 		},
@@ -52,6 +67,15 @@
 		},
 		"AzureSqlDatabase1_properties_typeProperties_userName": {
 			"value": "geeta"
+		},
+		"SqlServer1_properties_typeProperties_server": {
+			"value": "LAPTOP-0Q3S5CJC\\SQLEXPRESS"
+		},
+		"SqlServer1_properties_typeProperties_database": {
+			"value": "master"
+		},
+		"SqlServer1_properties_typeProperties_userName": {
+			"value": "sa"
 		},
 		"SqlServer_onprem_properties_typeProperties_server": {
 			"value": "DESKTOP-9OVP7SU\\SQLEXPRESS"
