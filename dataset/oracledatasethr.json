@@ -1,5 +1,5 @@
 {
-	"name": "oracledataseccore",
+	"name": "oracledatasethr",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "Oracle_core_schema",
