@@ -13,6 +13,178 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/df_scdtype2_new')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "New_2025"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "azureblob_storage_with_param",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "lkptgt"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "insTgt"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "updtgt"
+						}
+					],
+					"transformations": [
+						{
+							"name": "lookup1"
+						},
+						{
+							"name": "insertUpdateLogic"
+						},
+						{
+							"name": "split1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "derivedColumnActiveflaglogic"
+						},
+						{
+							"name": "derivedColumnActivflagNlogic"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "surrogateKeygenerate"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          Claim_number as string,",
+						"          incident_number as string,",
+						"          claimant_name as string,",
+						"          claimant_address as string,",
+						"          payment_type as string,",
+						"          claim_amount as string,",
+						"          Insurance_type as string,",
+						"          insurance_number as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"source(output(",
+						"          Claim_number as string,",
+						"          incident_number as string,",
+						"          claimant_name as string,",
+						"          claimant_address as string,",
+						"          payment_type as string,",
+						"          claim_amount as string,",
+						"          Insurance_type as string,",
+						"          insurance_number as string,",
+						"          sk_key as integer,",
+						"          Active_flag as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'select * from claim_tgt_scd2data where Active_flag=\\'Y\\'',",
+						"     format: 'query') ~> lkptgt",
+						"source1, lkptgt lookup(source1@Claim_number == lkptgt@Claim_number,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> lookup1",
+						"lookup1 derive(v_instr_ubdate_logic = iif(isNull(lkptgt@Claim_number),'i',iif(! isNull(lkptgt@Claim_number) && :src_md5!=:tgt_md5,'u','')),",
+						"          src_md5 := md5(source1@incident_number,source1@claimant_name,source1@claimant_address,source1@payment_type,source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
+						"          tgt_md5 := md5(lkptgt@incident_number,lkptgt@claimant_name,lkptgt@claimant_address,lkptgt@payment_type,lkptgt@claim_amount,lkptgt@Insurance_type,lkptgt@insurance_number)) ~> insertUpdateLogic",
+						"select1 split(v_instr_ubdate_logic=='i'||v_instr_ubdate_logic=='u',",
+						"     v_instr_ubdate_logic=='u',",
+						"     disjoint: false) ~> split1@(insert, update, default)",
+						"insertUpdateLogic select(mapColumn(",
+						"          Claim_number = source1@Claim_number,",
+						"          incident_number = source1@incident_number,",
+						"          claimant_name = source1@claimant_name,",
+						"          claimant_address = source1@claimant_address,",
+						"          payment_type = source1@payment_type,",
+						"          claim_amount = source1@claim_amount,",
+						"          Insurance_type = source1@Insurance_type,",
+						"          insurance_number = source1@insurance_number,",
+						"          Claim_number = lkptgt@Claim_number,",
+						"          sk_key,",
+						"          v_instr_ubdate_logic",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"surrogateKeygenerate derive(ins_activeflag = 'Y') ~> derivedColumnActiveflaglogic",
+						"split1@update derive(upd_active_flag = 'N') ~> derivedColumnActivflagNlogic",
+						"derivedColumnActivflagNlogic alterRow(updateIf(1==1)) ~> alterRow1",
+						"split1@insert keyGenerate(output(sk_key_generate as long),",
+						"     startAt: 1L,",
+						"     stepValue: 1L) ~> surrogateKeygenerate",
+						"derivedColumnActiveflaglogic sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          Claim_number,",
+						"          incident_number,",
+						"          claimant_name,",
+						"          claimant_address,",
+						"          payment_type,",
+						"          claim_amount,",
+						"          Insurance_type,",
+						"          insurance_number,",
+						"          sk_key = sk_key_generate,",
+						"          Active_flag = ins_activeflag",
+						"     )) ~> insTgt",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['sk_key'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          sk_key,",
+						"          Active_flag = upd_active_flag",
+						"     )) ~> updtgt"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/emp1copy_cumsal_senario3')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -2213,165 +2385,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-12-04T16:53:12Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/p_copy_multiple_f_with_getmetadata_foreach')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ForEach1",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Get Metadata1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Get Metadata1').output.childItems",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Copy data2",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "SqlServerSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false,
-											"tableOption": "autoCreate"
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": {
-													"value": "@pipeline().parameters.container",
-													"type": "Expression"
-												},
-												"filename": {
-													"value": "@item().name",
-													"type": "Expression"
-												},
-												"folder_name": {
-													"value": "@pipeline().parameters.folder",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "onprem_sql",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": "@pipeline().parameters.folder",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": "@item().name",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "Get Metadata1",
-						"type": "GetMetadata",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "adls2025",
-								"type": "DatasetReference",
-								"parameters": {
-									"file": {
-										"value": "@pipeline().parameters.container",
-										"type": "Expression"
-									}
-								}
-							},
-							"fieldList": [
-								"childItems"
-							],
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"container": {
-						"type": "string"
-					},
-					"folder": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "new2025"
-				},
-				"annotations": []
 			},
 			"dependsOn": []
 		}

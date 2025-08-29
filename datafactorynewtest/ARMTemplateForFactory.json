@@ -5158,6 +5158,63 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipeline7')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "azureblob_storage_with_param",
+								"type": "DatasetReference",
+								"parameters": {
+									"contanier_name": "project-folder",
+									"filename": {
+										"value": " ",
+										"type": "Expression"
+									},
+									"folder_name": "in_snyp_folder"
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "new2025"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/azureblob_storage_with_param')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/project_flow_with_cntrl_table_FULL_with_filter_activity')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -9562,7 +9619,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/oracledataseccore')]",
+			"name": "[concat(parameters('factoryName'), '/oracledatasethr')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -9746,12 +9803,12 @@
 					"connectionString": "[parameters('Oracle_core_schema_connectionString')]"
 				},
 				"connectVia": {
-					"referenceName": "integrationRuntime1",
+					"referenceName": "integrationRuntime2",
 					"type": "IntegrationRuntimeReference"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime2')]"
 			]
 		},
 		{
