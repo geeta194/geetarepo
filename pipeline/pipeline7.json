@@ -84,6 +84,10 @@
 								},
 								"sink": {
 									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "truncate table @{concat(replace(item().name,'.csv',''),'_stage')}",
+										"type": "Expression"
+									},
 									"writeBehavior": "insert",
 									"sqlWriterUseTableLock": false,
 									"tableOption": "autoCreate",
@@ -119,7 +123,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"table_name": {
-											"value": "@replace(item().name,'.csv','')",
+											"value": "@{concat(replace(item().name,'.csv',''),'_stage')}",
 											"type": "Expression"
 										},
 										"schema_name": "dbo"
