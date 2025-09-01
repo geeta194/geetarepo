@@ -1,5 +1,5 @@
 {
-	"name": "pipeline7",
+	"name": "p_adls_to_snyaps_usingazsql_adfas synap",
 	"properties": {
 		"activities": [
 			{
@@ -123,7 +123,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"table_name": {
-											"value": "@{concat(replace(item().name,'.csv',''),'_stage')}",
+											"value": "@{concat(replace(item().name,toUpper('csv'),''),'_stage')}",
 											"type": "Expression"
 										},
 										"schema_name": "dbo"
