@@ -1,0 +1,50 @@
+{
+	"name": "P_main_insurance_full_project_flow",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Pipelinep_adls_to_snyaps_stage_load",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_adls_to_snyaps_usingazsql_adfas synap",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Pipeline_for_dim_and _fact_LOad",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Pipelinep_adls_to_snyaps_stage_load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_curation_claim snyp_using _storeprocedur",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "new2025"
+		},
+		"annotations": []
+	}
+}
