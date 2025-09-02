@@ -13,6 +13,158 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/getfiles_from_adls_dianamicaly_load_azuresql')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Getfilesfromadls",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "azureblob_storage_with_param",
+								"type": "DatasetReference",
+								"parameters": {
+									"contanier_name": "project-folder",
+									"filename": {
+										"value": "*.csv",
+										"type": "Expression"
+									},
+									"folder_name": "src_folder"
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "Getfilesfromadls",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Getfilesfromadls').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1_copy1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"wildcardFileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												},
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false,
+											"tableOption": "autoCreate",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "azureblob_storage_with_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"contanier_name": "project-folder",
+												"filename": {
+													"value": " ",
+													"type": "Expression"
+												},
+												"folder_name": "src_folder"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AzureSql_dataset_withparam",
+											"type": "DatasetReference",
+											"parameters": {
+												"table_name": {
+													"value": "@replace(item().name,'.csv','')",
+													"type": "Expression"
+												},
+												"schema_name": "dbo"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "senario"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-01-23T04:05:27Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/incoming_structure_file')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -474,6 +626,155 @@
 					"v_latest_file": {
 						"type": "String"
 					}
+				},
+				"folder": {
+					"name": "new2025"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/p_adls_to_snyaps_usingazsql_adfas synap')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "azureblob_storage_with_param",
+								"type": "DatasetReference",
+								"parameters": {
+									"contanier_name": "project-folder",
+									"filename": {
+										"value": " ",
+										"type": "Expression"
+									},
+									"folder_name": "in_snyp_folder"
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": {
+												"value": "truncate table @{concat(replace(item().name,'.csv',''),'_stage')}",
+												"type": "Expression"
+											},
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false,
+											"tableOption": "autoCreate",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "azureblob_storage_with_param",
+											"type": "DatasetReference",
+											"parameters": {
+												"contanier_name": "project-folder",
+												"filename": {
+													"value": "@item().name",
+													"type": "Expression"
+												},
+												"folder_name": "in_snyp_folder"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AzureSql_dataset_withparam",
+											"type": "DatasetReference",
+											"parameters": {
+												"table_name": {
+													"value": "@{concat(replace(item().name,'.csv',''),'_stage')}",
+													"type": "Expression"
+												},
+												"schema_name": "dbo"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
 				},
 				"folder": {
 					"name": "new2025"
@@ -1005,61 +1306,6 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline7')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Get Metadata1",
-						"type": "GetMetadata",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "azureblob_storage_with_param",
-								"type": "DatasetReference",
-								"parameters": {
-									"contanier_name": "project-folder",
-									"filename": {
-										"value": " ",
-										"type": "Expression"
-									},
-									"folder_name": "in_snyp_folder"
-								}
-							},
-							"fieldList": [
-								"childItems"
-							],
-							"storeSettings": {
-								"type": "AzureBlobStorageReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "new2025"
 				},
 				"annotations": []
 			},
@@ -1994,165 +2240,6 @@
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
 						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_scdtype1_new')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"folder": {
-					"name": "New_2025"
-				},
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "azureblob_storage_with_param",
-								"type": "DatasetReference"
-							},
-							"name": "claimfile"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference"
-							},
-							"name": "lkpontgt"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference"
-							},
-							"name": "insertclaim"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference"
-							},
-							"name": "updsink"
-						}
-					],
-					"transformations": [
-						{
-							"name": "lkpinsertorupd"
-						},
-						{
-							"name": "renamecolumnnamebasedonincommingstream"
-						},
-						{
-							"name": "derivedColumn1"
-						},
-						{
-							"name": "selectrequiredcolumn"
-						},
-						{
-							"name": "splitinsertupdate"
-						},
-						{
-							"name": "alterRow1"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          Claim_number as string,",
-						"          incident_number as string,",
-						"          claimant_name as string,",
-						"          claimant_address as string,",
-						"          payment_type as string,",
-						"          claim_amount as integer,",
-						"          Insurance_type as string,",
-						"          insurance_number as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> claimfile",
-						"source(output(",
-						"          Claim_number as string,",
-						"          incident_number as string,",
-						"          claimant_name as string,",
-						"          claimant_address as string,",
-						"          payment_type as string,",
-						"          claim_amount as string,",
-						"          Insurance_type as string,",
-						"          insurance_number as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> lkpontgt",
-						"claimfile, lkpontgt lookup(claimfile@Claim_number == lkpontgt@Claim_number,",
-						"     multiple: false,",
-						"     pickup: 'any',",
-						"     broadcast: 'auto')~> lkpinsertorupd",
-						"lkpinsertorupd select(mapColumn(",
-						"          Claim_number = claimfile@Claim_number,",
-						"          incident_number = claimfile@incident_number,",
-						"          claimant_name = claimfile@claimant_name,",
-						"          claimant_address = claimfile@claimant_address,",
-						"          payment_type = claimfile@payment_type,",
-						"          claim_amount = claimfile@claim_amount,",
-						"          Insurance_type = claimfile@Insurance_type,",
-						"          insurance_number = claimfile@insurance_number,",
-						"          lkp_Claim_number = lkpontgt@Claim_number,",
-						"          lkp_incident_number = lkpontgt@incident_number,",
-						"          lkp_claimant_name = lkpontgt@claimant_name,",
-						"          lkp_claimant_address = lkpontgt@claimant_address,",
-						"          lkp_payment_type = lkpontgt@payment_type,",
-						"          lkp_claim_amount = lkpontgt@claim_amount,",
-						"          lkp_Insurance_type = lkpontgt@Insurance_type,",
-						"          lkp_insurance_number = lkpontgt@insurance_number",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> renamecolumnnamebasedonincommingstream",
-						"renamecolumnnamebasedonincommingstream derive(insert_update_logic = iif(isNull(lkp_Claim_number),'i','u')) ~> derivedColumn1",
-						"derivedColumn1 select(mapColumn(",
-						"          Claim_number,",
-						"          incident_number,",
-						"          claimant_name,",
-						"          claimant_address,",
-						"          payment_type,",
-						"          claim_amount,",
-						"          Insurance_type,",
-						"          insurance_number,",
-						"          lkp_Claim_number,",
-						"          insert_update_logic",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> selectrequiredcolumn",
-						"selectrequiredcolumn split(insert_update_logic=='i',",
-						"     insert_update_logic=='u',",
-						"     disjoint: false) ~> splitinsertupdate@(insert, update, default)",
-						"splitinsertupdate@update alterRow(updateIf(insert_update_logic=='u')) ~> alterRow1",
-						"splitinsertupdate@insert sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> insertclaim",
-						"alterRow1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     deletable:false,",
-						"     insertable:false,",
-						"     updateable:true,",
-						"     upsertable:false,",
-						"     keys:['Claim_number'],",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> updsink"
 					]
 				}
 			},

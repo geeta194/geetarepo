@@ -13,6 +13,165 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/df_scdtype1_new')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "New_2025"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "azureblob_storage_with_param",
+								"type": "DatasetReference"
+							},
+							"name": "claimfile"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "lkpontgt"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "insertclaim"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "updsink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "lkpinsertorupd"
+						},
+						{
+							"name": "renamecolumnnamebasedonincommingstream"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "selectrequiredcolumn"
+						},
+						{
+							"name": "splitinsertupdate"
+						},
+						{
+							"name": "alterRow1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          Claim_number as string,",
+						"          incident_number as string,",
+						"          claimant_name as string,",
+						"          claimant_address as string,",
+						"          payment_type as string,",
+						"          claim_amount as integer,",
+						"          Insurance_type as string,",
+						"          insurance_number as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> claimfile",
+						"source(output(",
+						"          Claim_number as string,",
+						"          incident_number as string,",
+						"          claimant_name as string,",
+						"          claimant_address as string,",
+						"          payment_type as string,",
+						"          claim_amount as string,",
+						"          Insurance_type as string,",
+						"          insurance_number as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> lkpontgt",
+						"claimfile, lkpontgt lookup(claimfile@Claim_number == lkpontgt@Claim_number,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> lkpinsertorupd",
+						"lkpinsertorupd select(mapColumn(",
+						"          Claim_number = claimfile@Claim_number,",
+						"          incident_number = claimfile@incident_number,",
+						"          claimant_name = claimfile@claimant_name,",
+						"          claimant_address = claimfile@claimant_address,",
+						"          payment_type = claimfile@payment_type,",
+						"          claim_amount = claimfile@claim_amount,",
+						"          Insurance_type = claimfile@Insurance_type,",
+						"          insurance_number = claimfile@insurance_number,",
+						"          lkp_Claim_number = lkpontgt@Claim_number,",
+						"          lkp_incident_number = lkpontgt@incident_number,",
+						"          lkp_claimant_name = lkpontgt@claimant_name,",
+						"          lkp_claimant_address = lkpontgt@claimant_address,",
+						"          lkp_payment_type = lkpontgt@payment_type,",
+						"          lkp_claim_amount = lkpontgt@claim_amount,",
+						"          lkp_Insurance_type = lkpontgt@Insurance_type,",
+						"          lkp_insurance_number = lkpontgt@insurance_number",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> renamecolumnnamebasedonincommingstream",
+						"renamecolumnnamebasedonincommingstream derive(insert_update_logic = iif(isNull(lkp_Claim_number),'i','u')) ~> derivedColumn1",
+						"derivedColumn1 select(mapColumn(",
+						"          Claim_number,",
+						"          incident_number,",
+						"          claimant_name,",
+						"          claimant_address,",
+						"          payment_type,",
+						"          claim_amount,",
+						"          Insurance_type,",
+						"          insurance_number,",
+						"          lkp_Claim_number,",
+						"          insert_update_logic",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectrequiredcolumn",
+						"selectrequiredcolumn split(insert_update_logic=='i',",
+						"     insert_update_logic=='u',",
+						"     disjoint: false) ~> splitinsertupdate@(insert, update, default)",
+						"splitinsertupdate@update alterRow(updateIf(insert_update_logic=='u')) ~> alterRow1",
+						"splitinsertupdate@insert sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> insertclaim",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['Claim_number'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> updsink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/df_scdtype2_new')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -2263,128 +2422,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2025-01-05T05:55:41Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/oracle_onprem_to_sql_onprem_for city')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "oracle_onprem_to_sql_onprem_for city",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "OracleSource",
-								"partitionOption": "None",
-								"queryTimeout": "02:00:00"
-							},
-							"sink": {
-								"type": "SqlServerSink",
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "EMPNO",
-											"type": "Double"
-										},
-										"sink": {
-											"name": "empno",
-											"type": "Int32",
-											"physicalType": "int"
-										}
-									},
-									{
-										"source": {
-											"name": "CITY",
-											"type": "String"
-										},
-										"sink": {
-											"name": "city",
-											"type": "String",
-											"physicalType": "varchar"
-										}
-									}
-								],
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "oracle_db_onprem_with_param",
-								"type": "DatasetReference",
-								"parameters": {
-									"schema_name": {
-										"value": "@pipeline().parameters.schema_name",
-										"type": "Expression"
-									},
-									"table_name": {
-										"value": "@pipeline().parameters.table_name",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "sqlserver_db_onprem",
-								"type": "DatasetReference",
-								"parameters": {
-									"schema_name": {
-										"value": "@pipeline().parameters.t_schema_name",
-										"type": "Expression"
-									},
-									"table_name": {
-										"value": "@pipeline().parameters.t_table_name",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"schema_name": {
-						"type": "string"
-					},
-					"table_name": {
-						"type": "string"
-					},
-					"t_schema_name": {
-						"type": "string"
-					},
-					"t_table_name": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "class_HW_folder"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-04T16:53:12Z"
 			},
 			"dependsOn": []
 		}
