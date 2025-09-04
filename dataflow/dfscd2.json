@@ -1,0 +1,155 @@
+{
+	"name": "dfscd2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dataset_azblob_2025",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "lkptgt"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "sinkinsert"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSql_dataset_withparam",
+						"type": "DatasetReference"
+					},
+					"name": "sinkupdate"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "insertupdatelogic"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "split1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "activeflagNderivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Claim_number as string,",
+				"          incident_number as string,",
+				"          claimant_name as string,",
+				"          claimant_address as string,",
+				"          payment_type as string,",
+				"          claim_amount as integer,",
+				"          Insurance_type as string,",
+				"          insurance_number as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source(output(",
+				"          Claim_number as string,",
+				"          incident_number as string,",
+				"          claimant_name as string,",
+				"          claimant_address as string,",
+				"          payment_type as string,",
+				"          claim_amount as string,",
+				"          Insurance_type as string,",
+				"          insurance_number as string,",
+				"          sk_key as integer,",
+				"          Active_flag as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> lkptgt",
+				"source1, lkptgt lookup(source1@Claim_number == lkptgt@Claim_number,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 derive(insert_update_flag = iif(isNull(lkptgt@Claim_number),'i',\r",
+				" iif(not(isNull(lkptgt@Claim_number)) && :md5_src != :md5_tgt,'u','')),",
+				"          md5_src := md5(source1@incident_number,source1@claimant_name,source1@claimant_address,source1@payment_type,\r",
+				"source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
+				"          md5_tgt := md5(lkptgt@incident_number,lkptgt@claimant_name,lkptgt@claimant_address,lkptgt@payment_type,\r",
+				"lkptgt@claim_amount,lkptgt@Insurance_type,lkptgt@insurance_number)\r",
+				") ~> insertupdatelogic",
+				"split1@insert keyGenerate(output(sk_key as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(Active_flag = 'Y') ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          Claim_number = source1@Claim_number,",
+				"          incident_number = source1@incident_number,",
+				"          claimant_name = source1@claimant_name,",
+				"          claimant_address = source1@claimant_address,",
+				"          payment_type = source1@payment_type,",
+				"          claim_amount = source1@claim_amount,",
+				"          Insurance_type = source1@Insurance_type,",
+				"          insurance_number = source1@insurance_number,",
+				"          sk_key,",
+				"          Active_flag",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"insertupdatelogic split(insert_update_flag == 'i' ||insert_update_flag == 'u',",
+				"     insert_update_flag == 'u',",
+				"     disjoint: false) ~> split1@(insert, update)",
+				"split1@update alterRow(updateIf(1 == 1)) ~> alterRow1",
+				"alterRow1 derive(Active_flag = 'n') ~> activeflagNderivedColumn2",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkinsert",
+				"activeflagNderivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          sk_key,",
+				"          Active_flag",
+				"     )) ~> sinkupdate"
+			]
+		}
+	}
+}
