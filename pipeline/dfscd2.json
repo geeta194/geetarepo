@@ -1,0 +1,51 @@
+{
+	"name": "dfscd2",
+	"properties": {
+		"activities": [
+			{
+				"name": "dfscd2",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dfscd2",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"source1": {
+								"container": "project-folder",
+								"folder": "src_folder",
+								"file": "claim_src_data.csv"
+							},
+							"lkptgt": {
+								"table_name": "claim_tgt_scd2data",
+								"schema_name": "dbo"
+							},
+							"sinkupdate": {
+								"table_name": "claim_tgt_scd2data",
+								"schema_name": "dbo"
+							},
+							"sink1": {
+								"schema_name": "dbo",
+								"table_name": "claim_tgt_scd2data"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
