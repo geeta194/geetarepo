@@ -1282,6 +1282,177 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/dfscd2')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dataset_azblob_2025",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						},
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "lkptgt"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference"
+							},
+							"name": "sinkupdate"
+						},
+						{
+							"dataset": {
+								"referenceName": "ls_azuresql_for_dataflow",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "lookup1"
+						},
+						{
+							"name": "insertupdatelogic"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "split1"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "activeflagNderivedColumn2"
+						},
+						{
+							"name": "surrogateKey1"
+						},
+						{
+							"name": "select2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          Claim_number as string,",
+						"          incident_number as string,",
+						"          claimant_name as string,",
+						"          claimant_address as string,",
+						"          payment_type as string,",
+						"          claim_amount as integer,",
+						"          Insurance_type as string,",
+						"          insurance_number as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"source(output(",
+						"          Claim_number as string,",
+						"          incident_number as string,",
+						"          claimant_name as string,",
+						"          claimant_address as string,",
+						"          payment_type as string,",
+						"          claim_amount as string,",
+						"          Insurance_type as string,",
+						"          insurance_number as string,",
+						"          sk_key as integer,",
+						"          Active_flag as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> lkptgt",
+						"source1, lkptgt lookup(source1@Claim_number == lkptgt@Claim_number,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> lookup1",
+						"lookup1 derive(insert_update_flag = iif(isNull(lkptgt@Claim_number),'i',\r",
+						" iif(not(isNull(lkptgt@Claim_number)) && :md5_src != :md5_tgt,'u','')),",
+						"          md5_src := md5(source1@incident_number,source1@claimant_name,source1@claimant_address,source1@payment_type,\r",
+						"source1@claim_amount,source1@Insurance_type,source1@insurance_number),",
+						"          md5_tgt := md5(lkptgt@incident_number,lkptgt@claimant_name,lkptgt@claimant_address,lkptgt@payment_type,\r",
+						"lkptgt@claim_amount,lkptgt@Insurance_type,lkptgt@insurance_number)\r",
+						") ~> insertupdatelogic",
+						"surrogateKey1 derive(Active_flag = 'Y') ~> derivedColumn1",
+						"insertupdatelogic split(insert_update_flag == 'i' ||insert_update_flag == 'u',",
+						"     insert_update_flag == 'u',",
+						"     disjoint: false) ~> split1@(insert, update)",
+						"split1@update alterRow(updateIf(1 == 1)) ~> alterRow1",
+						"alterRow1 derive(Active_flag = 'n') ~> activeflagNderivedColumn2",
+						"select2 keyGenerate(output(surrogatekeygenerated as long),",
+						"     startAt: 1L,",
+						"     stepValue: 1L) ~> surrogateKey1",
+						"split1@insert select(mapColumn(",
+						"          Claim_number = split1@insert@Claim_number,",
+						"          incident_number = split1@insert@incident_number,",
+						"          claimant_name = split1@insert@claimant_name,",
+						"          claimant_address = split1@insert@claimant_address,",
+						"          payment_type = split1@insert@payment_type,",
+						"          claim_amount = split1@insert@claim_amount,",
+						"          Insurance_type = split1@insert@Insurance_type,",
+						"          insurance_number = split1@insert@insurance_number,",
+						"          sk_key,",
+						"          Active_flag,",
+						"          insert_update_flag",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"activeflagNderivedColumn2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          sk_key,",
+						"          Active_flag",
+						"     )) ~> sinkupdate",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          Claim_number,",
+						"          incident_number,",
+						"          claimant_name,",
+						"          claimant_address,",
+						"          payment_type,",
+						"          claim_amount,",
+						"          Insurance_type,",
+						"          insurance_number,",
+						"          sk_key = surrogatekeygenerated,",
+						"          Active_flag",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Get Metadata_practic')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1622,6 +1793,64 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2025-01-15T17:49:56Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/P_main_insurance_full_project_flow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipelinep_adls_to_snyaps_stage_load",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "p_adls_to_snyaps_usingazsql_adfas synap",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pipeline_for_dim_and _fact_LOad",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipelinep_adls_to_snyaps_stage_load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "p_curation_claim snyp_using _storeprocedur",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "new2025"
+				},
+				"annotations": []
 			},
 			"dependsOn": []
 		},
@@ -2116,312 +2345,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-12-04T16:53:12Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/getting_deleted_file_to_src_location')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "sqlserver_db_onprem",
-								"type": "DatasetReference",
-								"parameters": {
-									"schema_name": {
-										"value": "@pipeline().parameters.schema",
-										"type": "Expression"
-									},
-									"table_name": {
-										"value": "@pipeline().parameters.table",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "azureblob_storage_with_param",
-								"type": "DatasetReference",
-								"parameters": {
-									"contanier_name": "input",
-									"filename": {
-										"value": "@concat(pipeline().parameters.table,'.csv')",
-										"type": "Expression"
-									},
-									"folder_name": "new"
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"schema": {
-						"type": "string"
-					},
-					"table": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "New folder"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-05T17:42:14Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/incr_load_with_watermarktable')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "lkponwatermarktable",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "sqlserver_db_onprem",
-								"type": "DatasetReference",
-								"parameters": {
-									"schema_name": "dbo",
-									"table_name": "wartermarktable"
-								}
-							}
-						}
-					},
-					{
-						"name": "latestupdatedate_Lookup_on file_src",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource",
-								"sqlReaderQuery": "select max(last_modifytime) as latestupdatedate from file_src",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "sqlserver_db_onprem",
-								"type": "DatasetReference",
-								"parameters": {
-									"schema_name": {
-										"value": "@pipeline().parameters.schema_name",
-										"type": "Expression"
-									},
-									"table_name": {
-										"value": "@pipeline().parameters.table_name",
-										"type": "Expression"
-									}
-								}
-							}
-						}
-					},
-					{
-						"name": "Copy data1",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "lkponwatermarktable",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							},
-							{
-								"activity": "latestupdatedate_Lookup_on file_src",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource",
-								"sqlReaderQuery": {
-									"value": "select * from file_src where last_modifytime>'@{activity('lkponwatermarktable').output.firstRow.watermarkvalue}' and last_modifytime<='@{activity('latestupdatedate_Lookup_on file_src').output.firstRow.latestupdatedate}'\n\n\n",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "sqlserver_db_onprem",
-								"type": "DatasetReference",
-								"parameters": {
-									"schema_name": "dbo.",
-									"table_name": "file_src"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "azureblob_storage_with_param",
-								"type": "DatasetReference",
-								"parameters": {
-									"contanier_name": "project-folder",
-									"filename": {
-										"value": "@concat('file.',pipeline().RunId)",
-										"type": "Expression"
-									},
-									"folder_name": "tgt_folder"
-								}
-							}
-						]
-					},
-					{
-						"name": "Stored procedure1",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "Copy data1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[update_watermark_table]",
-							"storedProcedureParameters": {
-								"lastmodifytime": {
-									"value": {
-										"value": "@activity('latestupdatedate_Lookup_on file_src').output.firstRow.latestupdatedate",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"tablename": {
-									"value": {
-										"value": "@activity('latestupdatedate_Lookup_on file_src').output.firstRow.table_name\n",
-										"type": "Expression"
-									},
-									"type": "String"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "SqlServer_onprem",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"schema_name": {
-						"type": "string"
-					},
-					"table_name": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-01-05T05:55:41Z"
 			},
 			"dependsOn": []
 		}
