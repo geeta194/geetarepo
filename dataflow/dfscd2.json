@@ -25,14 +25,14 @@
 						"referenceName": "AzureSql_dataset_withparam",
 						"type": "DatasetReference"
 					},
-					"name": "sinkinsert"
+					"name": "sinkupdate"
 				},
 				{
 					"dataset": {
-						"referenceName": "AzureSql_dataset_withparam",
+						"referenceName": "ls_azuresql_for_dataflow",
 						"type": "DatasetReference"
 					},
-					"name": "sinkupdate"
+					"name": "sink1"
 				}
 			],
 			"transformations": [
@@ -43,13 +43,7 @@
 					"name": "insertupdatelogic"
 				},
 				{
-					"name": "surrogateKey1"
-				},
-				{
 					"name": "derivedColumn1"
-				},
-				{
-					"name": "select1"
 				},
 				{
 					"name": "split1"
@@ -59,6 +53,12 @@
 				},
 				{
 					"name": "activeflagNderivedColumn2"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "select2"
 				}
 			],
 			"scriptLines": [
@@ -102,39 +102,30 @@
 				"          md5_tgt := md5(lkptgt@incident_number,lkptgt@claimant_name,lkptgt@claimant_address,lkptgt@payment_type,\r",
 				"lkptgt@claim_amount,lkptgt@Insurance_type,lkptgt@insurance_number)\r",
 				") ~> insertupdatelogic",
-				"split1@insert keyGenerate(output(sk_key as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1",
 				"surrogateKey1 derive(Active_flag = 'Y') ~> derivedColumn1",
-				"derivedColumn1 select(mapColumn(",
-				"          Claim_number = source1@Claim_number,",
-				"          incident_number = source1@incident_number,",
-				"          claimant_name = source1@claimant_name,",
-				"          claimant_address = source1@claimant_address,",
-				"          payment_type = source1@payment_type,",
-				"          claim_amount = source1@claim_amount,",
-				"          Insurance_type = source1@Insurance_type,",
-				"          insurance_number = source1@insurance_number,",
-				"          sk_key,",
-				"          Active_flag",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
 				"insertupdatelogic split(insert_update_flag == 'i' ||insert_update_flag == 'u',",
 				"     insert_update_flag == 'u',",
 				"     disjoint: false) ~> split1@(insert, update)",
 				"split1@update alterRow(updateIf(1 == 1)) ~> alterRow1",
 				"alterRow1 derive(Active_flag = 'n') ~> activeflagNderivedColumn2",
-				"select1 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
+				"select2 keyGenerate(output(surrogatekeygenerated as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"split1@insert select(mapColumn(",
+				"          Claim_number = split1@insert@Claim_number,",
+				"          incident_number = split1@insert@incident_number,",
+				"          claimant_name = split1@insert@claimant_name,",
+				"          claimant_address = split1@insert@claimant_address,",
+				"          payment_type = split1@insert@payment_type,",
+				"          claim_amount = split1@insert@claim_amount,",
+				"          Insurance_type = split1@insert@Insurance_type,",
+				"          insurance_number = split1@insert@insurance_number,",
+				"          sk_key,",
+				"          Active_flag,",
+				"          insert_update_flag",
+				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkinsert",
+				"     skipDuplicateMapOutputs: true) ~> select2",
 				"activeflagNderivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
@@ -148,7 +139,29 @@
 				"     mapColumn(",
 				"          sk_key,",
 				"          Active_flag",
-				"     )) ~> sinkupdate"
+				"     )) ~> sinkupdate",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Claim_number,",
+				"          incident_number,",
+				"          claimant_name,",
+				"          claimant_address,",
+				"          payment_type,",
+				"          claim_amount,",
+				"          Insurance_type,",
+				"          insurance_number,",
+				"          sk_key = surrogatekeygenerated,",
+				"          Active_flag",
+				"     )) ~> sink1"
 			]
 		}
 	}
