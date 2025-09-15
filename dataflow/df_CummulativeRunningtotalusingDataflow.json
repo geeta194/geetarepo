@@ -55,8 +55,10 @@
 				"          MANAGER_ID as string,",
 				"          DEPARTMENT_ID as string",
 				"     ),",
+				"     partitionFileNames:['emp1tgt.csv'],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
 			]
 		}
 	}
