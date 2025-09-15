@@ -20,8 +20,8 @@
 						"type": "DataFlowReference",
 						"datasetParameters": {
 							"source1": {
-								"contanier_name": "propject-folder",
-								"filename": "emp1.csvemp1.csv",
+								"contanier_name": "project-folder",
+								"filename": "emp1.csv",
 								"folder_name": "src_folder"
 							},
 							"sink1": {
