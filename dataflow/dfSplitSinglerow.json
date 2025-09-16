@@ -26,7 +26,10 @@
 			],
 			"transformations": [
 				{
-					"name": "unpivot1"
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "flatten1"
 				}
 			],
 			"scriptLines": [
@@ -37,14 +40,15 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source1",
-				"source1 unpivot(output(",
-				"          skill as string,",
-				"          skill_split as string",
+				"source1 derive(skill_list = split(skill_list, ',')) ~> derivedColumn1",
+				"derivedColumn1 foldDown(unroll(skill_list),",
+				"     mapColumn(",
+				"          empid,",
+				"          skill_list",
 				"     ),",
-				"     ungroupBy(empid),",
-				"     lateral: true,",
-				"     ignoreNullPivots: false) ~> unpivot1",
-				"unpivot1 sink(allowSchemaDrift: true,",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          EMPLOYEE_ID as string,",
