@@ -1,0 +1,17 @@
+{
+	"name": "dfSplitSinglerow",
+	"properties": {
+		"folder": {
+			"name": "senarionew"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				""
+			]
+		}
+	}
+}
