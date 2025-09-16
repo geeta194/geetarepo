@@ -59,6 +59,7 @@
 				"          MANAGER_ID as string,",
 				"          DEPARTMENT_ID as string",
 				"     ),",
+				"     partitionFileNames:[''],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
