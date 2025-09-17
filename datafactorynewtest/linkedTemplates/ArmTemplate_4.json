@@ -13,6 +13,617 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/adls_storage_to_sqltable_customer')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "adls_storage_to_sqltable_customer",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SqlServerSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate"
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "azureblob_storage_with_param",
+								"type": "DatasetReference",
+								"parameters": {
+									"contanier_name": "input",
+									"filename": "customers.csv",
+									"folder_name": {
+										"value": " ",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sqlserver_db_onprem",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema_name": "dbo",
+									"table_name": "customers"
+								}
+							}
+						]
+					},
+					{
+						"name": "sqldb_to_adlstorage",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "adls_storage_to_sqltable_customer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "sqlserver_db_onprem",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema_name": "dbo",
+									"table_name": "customers"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "azureblob_storage_with_param",
+								"type": "DatasetReference",
+								"parameters": {
+									"contanier_name": "output",
+									"filename": "customer.csv",
+									"folder_name": {
+										"value": " ",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "copy_to_arcivle_frm_adls_and_zip_and_delet_frm_adls",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "sqldb_to_adlstorage",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "copy_to_arcivle_path_from_adls_and_zip_and_delet_frm_adls",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "class_HW_folder"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-12-05T17:42:14Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/azure_sql_to_onprem_sql_customer_load')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "azure_sql_to_onprem_sql_customer_load",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlServerSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate"
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSql_dataset_withparam",
+								"type": "DatasetReference",
+								"parameters": {
+									"table_name": {
+										"value": "@pipeline().parameters.table_name",
+										"type": "Expression"
+									},
+									"schema_name": {
+										"value": "@pipeline().parameters.schema_name",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sqlserver_db_onprem",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema_name": {
+										"value": "@pipeline().parameters.t_schema_name",
+										"type": "Expression"
+									},
+									"table_name": {
+										"value": "@pipeline().parameters.t_table_name",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"table_name": {
+						"type": "string"
+					},
+					"schema_name": {
+						"type": "string"
+					},
+					"t_table_name": {
+						"type": "string"
+					},
+					"t_schema_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "class_HW_folder"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-12-05T17:51:51Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowSKkey')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflowSKkey",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {
+										"contanier_name": "project-folder",
+										"filename": "employee.csv",
+										"folder_name": "src_folder"
+									},
+									"sink1": {
+										"contanier_name": "project-folder",
+										"filename": "SKEEMP.csv",
+										"folder_name": "tgt_folder"
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-01-09T03:15:08Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow_unpivot')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow_unpivot",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {
+										"table_name": "UNPIVOTSOURCE",
+										"schema_name": "DBO"
+									},
+									"sink1": {
+										"table_name": "UNPIVOTTARGET",
+										"schema_name": "DBO"
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-01-09T02:24:13Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_CummulativeRunningtotalusingDataflow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_CummulativeRunningtotalusingDataflow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_CummulativeRunningtotalusingDataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {
+										"contanier_name": "project-folder",
+										"filename": "emp1.csv",
+										"folder_name": "src_folder"
+									},
+									"sink1": {
+										"contanier_name": "project-folder",
+										"filename": {
+											"value": " ",
+											"type": "Expression"
+										},
+										"folder_name": "tgt_folder"
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "new2025"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dfscd2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "dfscd2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dfscd2",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {
+										"container": "project-folder",
+										"folder": "src_folder",
+										"file": "claim_src_data.csv"
+									},
+									"lkptgt": {
+										"table_name": "claim_tgt_scd2data",
+										"schema_name": "dbo"
+									},
+									"sinkupdate": {
+										"table_name": "claim_tgt_scd2data",
+										"schema_name": "dbo"
+									},
+									"sink1": {
+										"schema_name": "dbo",
+										"table_name": "claim_tgt_scd2data"
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dup_handling_cityload')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "dup_handling_cityload",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlServerSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage3",
+										"type": "LinkedServiceReference"
+									},
+									"path": "output"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "sqlserver_db_onprem",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema_name": {
+										"value": "@pipeline().parameters.schema_name",
+										"type": "Expression"
+									},
+									"table_name": {
+										"value": "@pipeline().parameters.table_name",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sqlserver_db_onprem",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema_name": {
+										"value": "@pipeline().parameters.t_schema",
+										"type": "Expression"
+									},
+									"table_name": {
+										"value": "@pipeline().parameters.t_table",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"schema_name": {
+						"type": "string"
+					},
+					"table_name": {
+						"type": "string"
+					},
+					"t_schema": {
+						"type": "string"
+					},
+					"t_table": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "class_HW_folder"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-12-04T16:53:12Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/getting_deleted_file_to_src_location')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -441,6 +1052,61 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/p_MergMultiplerowintoasinglerow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_MergMultiplerowintoasinglerow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {
+										"contanier_name": "project-folder",
+										"filename": "listagg_src.csv",
+										"folder_name": "src_folder"
+									},
+									"sink1": {
+										"contanier_name": "project-folder",
+										"filename": "tgt_listagg.csv",
+										"folder_name": "tgt_folder"
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "new2025"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/p_copy_multiple_f_with_getmetadata_foreach')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -591,6 +1257,61 @@
 					"folder": {
 						"type": "string"
 					}
+				},
+				"folder": {
+					"name": "new2025"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/p_dfSplitSinglerow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dfSplitSinglerow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {
+										"contanier_name": "project-folder",
+										"filename": "tgt_listagg.csv",
+										"folder_name": "tgt_folder"
+									},
+									"sink1": {
+										"contanier_name": "project-folder",
+										"filename": "tgt_splitrow.csv",
+										"folder_name": "src_foldeer"
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
 				},
 				"folder": {
 					"name": "new2025"
@@ -2094,2573 +2815,6 @@
 					"name": "2025_senario"
 				},
 				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline6')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "p_scdtype2_new",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_scdtype2_new",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {
-										"contanier_name": "project-folder",
-										"filename": "claim_src_data.csv",
-										"folder_name": "src_folder"
-									},
-									"lkptgt": {
-										"table_name": "claim_tgt_scd2data",
-										"schema_name": "dbo"
-									},
-									"insTgt": {
-										"table_name": "claim_tgt_scd2data",
-										"schema_name": "dbo"
-									},
-									"updtgt": {
-										"table_name": "claim_tgt_scd2data",
-										"schema_name": "dbo"
-									}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "2025_senario"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/project_flow_with_cntrl_table_FULL_with_filter_activity')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup_on_cntrl_table_for_incr_load",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select * from METADATA.CONTROL_TABLE where source_system='@{pipeline().parameters.source_system}' AND LOAD_TYPE='@{pipeline().parameters.load_type}'",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference",
-								"parameters": {
-									"table_name": "CONTROL_TABLE",
-									"schema_name": "METADATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach1",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Filter1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Filter1').output.value\n",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "onprem_sql_to azureblob",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": {
-												"value": "select * from @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME} \n\n",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "sqlserver_db_onprem",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": "@item().SOURCE_TABLE_SCHEMA",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": "@item().SOURCE_TABLE_NAME",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": {
-													"value": "@concat(item().TARGET_TABLE,'.csv')",
-													"type": "Expression"
-												},
-												"folder_name": {
-													"value": "@item().TARGET_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "azureblob_to_azuresql",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "onprem_sql_to azureblob",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false,
-											"tableOption": "autoCreate",
-											"disableMetricsCollection": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "AzureSql_dataset_withparam",
-											"type": "DatasetReference",
-											"parameters": {
-												"table_name": {
-													"value": "@item().TARGET_TABLE",
-													"type": "Expression"
-												},
-												"schema_name": {
-													"value": "@item().TARGET_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "arcive-from_azureblob_to_arcivefolder",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "azureblob_to_azuresql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "dataset_for_arcive",
-											"type": "DatasetReference",
-											"parameters": {
-												"container": "arcive",
-												"file": {
-													"value": " ",
-													"type": "Expression"
-												},
-												"folder": {
-													"value": " ",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "delete_from_azureblob_after arcive",
-									"type": "Delete",
-									"dependsOn": [
-										{
-											"activity": "arcive-from_azureblob_to_arcivefolder",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										},
-										"enableLogging": false,
-										"storeSettings": {
-											"type": "AzureBlobStorageReadSettings",
-											"recursive": true,
-											"enablePartitionDiscovery": false
-										}
-									}
-								},
-								{
-									"name": "Lookup_to get_max_update_date_from_trans_table",
-									"type": "Lookup",
-									"dependsOn": [
-										{
-											"activity": "delete_from_azureblob_after arcive",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": {
-												"value": "select max(@{item().WATERMARK_COLUMN}) as max_update_date from   @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME}",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "sqlserver_db_onprem",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": " ",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": " ",
-													"type": "Expression"
-												}
-											}
-										}
-									}
-								},
-								{
-									"name": "Set_max_update_date",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Lookup_to get_max_update_date_from_trans_table",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "max_updat_date",
-										"value": {
-											"value": "@STRING(activity('Lookup_to get_max_update_date_from_trans_table').output.firstRow.max_updat_date)",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "update_proceed_date_as max_date_on_cntrl_table",
-									"type": "Script",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase1",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "update METADATA.CONTROL_TABLE set PROCESSED_DATE='@{variables('v_max_update_date')}' where control_id=@{item().CONTROL_ID}\n\n\n",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								},
-								{
-									"name": "update_proceed_date_as max_date_on_cntrl_table_using_sp",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "Set_max_update_date",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[dbo].[update_PROCESSED_DATE]",
-										"storedProcedureParameters": {
-											"in_CONTROL_ID": {
-												"value": {
-													"value": "@item().CONTROL_ID",
-													"type": "Expression"
-												}
-											},
-											"in_PROCESSED_DATE": {
-												"value": {
-													"value": "@variables('max_updat_date')",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase1",
-										"type": "LinkedServiceReference"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Filter1",
-						"type": "Filter",
-						"dependsOn": [
-							{
-								"activity": "Lookup_on_cntrl_table_for_incr_load",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup_on_cntrl_table_for_incr_load').output.value",
-								"type": "Expression"
-							},
-							"condition": {
-								"value": "@equals(item().SOURCE_TABLE_NAME,'CLAIM')",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"SOURCE_SYSTEM": {
-						"type": "string",
-						"defaultValue": "SQL_SERVER"
-					},
-					"LOAD_TYPE": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"max_updat_date": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "class_HW_folder"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-10T22:10:13Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/project_flow_with_cntrl_table_for_full_load')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "lookup on control_table",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select* from dbo.CONTROL_TABLE where source_system='@{pipeline().parameters.SOURCE_SYSTEM}' and load_type='@{pipeline().parameters.LOAD_TYPE}'",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference",
-								"parameters": {
-									"table_name": "CONTROL_TABLE",
-									"schema_name": "METADATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "process sources table",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "lookup on control_table",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('lookup on control_table').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "copy data_onprmsql_to_azblob",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "sqlserver_db_onprem",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": "@item().SOURCE_TABLE_SCHEMA\n",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": "@item().SOURCE_TABLE_NAME",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": {
-													"value": "@concat(item().TARGET_TABLE,'.csv')",
-													"type": "Expression"
-												},
-												"folder_name": {
-													"value": "@item().SOURCE_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "azblob_to_azsql",
-									"type": "Copy",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [
-										{
-											"activity": "copy data_onprmsql_to_azblob",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false,
-											"tableOption": "autoCreate",
-											"disableMetricsCollection": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": {
-													"value": "@concat(item().TARGET_TABLE,'.csv')\n\n",
-													"type": "Expression"
-												},
-												"folder_name": {
-													"value": "@item().SOURCE_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "AzureSql_dataset_withparam",
-											"type": "DatasetReference",
-											"parameters": {
-												"table_name": {
-													"value": "@item().TARGET_TABLE",
-													"type": "Expression"
-												},
-												"schema_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										}
-									]
-								},
-								{
-									"name": "arcive_the_file_to_arcival_location",
-									"type": "Copy",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [
-										{
-											"activity": "azblob_to_azsql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().SOURCE_TABLE_SCHEMA"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "dataset_for_arcive",
-											"type": "DatasetReference",
-											"parameters": {
-												"container": "arcive",
-												"file": {
-													"value": "@concat(item().TARGET_TABLE,'_',utcNow(),'.csv')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "delete_file_from_blob_after_arcive",
-									"type": "Delete",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [
-										{
-											"activity": "arcive_the_file_to_arcival_location",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().SOURCE_TABLE_SCHEMA"
-											}
-										},
-										"enableLogging": false,
-										"storeSettings": {
-											"type": "AzureBlobStorageReadSettings",
-											"recursive": true,
-											"enablePartitionDiscovery": false
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"SOURCE_SYSTEM": {
-						"type": "string",
-						"defaultValue": "SQL_SERVER"
-					},
-					"LOAD_TYPE": {
-						"type": "string",
-						"defaultValue": "FULL"
-					}
-				},
-				"variables": {
-					"max_update_date": {
-						"type": "String"
-					},
-					"v_max_update_date": {
-						"type": "String"
-					},
-					"max_updat_date": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "class_HW_folder"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-21T17:52:18Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/project_flow_with_cntrl_table_incr')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup_on_cntrl_table_for_incr_load",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select * from METADATA.CONTROL_TABLE where source_system='@{pipeline().parameters.source_system}' AND LOAD_TYPE='@{pipeline().parameters.load_type}'",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference",
-								"parameters": {
-									"table_name": "CONTROL_TABLE",
-									"schema_name": "METADATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach1",
-						"type": "ForEach",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [
-							{
-								"activity": "Lookup_on_cntrl_table_for_incr_load",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup_on_cntrl_table_for_incr_load').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "onprem_sql_to azureblob",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": {
-												"value": "select * from @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME} where @{item().WATERMARK_COLUMN} > '@{item().PROCESSED_DATE}'\n\n",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "sqlserver_db_onprem",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": "@item().SOURCE_TABLE_SCHEMA",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": "@item().SOURCE_TABLE_NAME",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": {
-													"value": "@concat(item().TARGET_TABLE,'.csv')",
-													"type": "Expression"
-												},
-												"folder_name": {
-													"value": "@item().TARGET_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "azureblob_to_azuresql",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "onprem_sql_to azureblob",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false,
-											"tableOption": "autoCreate",
-											"disableMetricsCollection": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "AzureSql_dataset_withparam",
-											"type": "DatasetReference",
-											"parameters": {
-												"table_name": {
-													"value": "@item().TARGET_TABLE",
-													"type": "Expression"
-												},
-												"schema_name": {
-													"value": "@item().TARGET_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "arcive-from_azureblob_to_arcivefolder",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "azureblob_to_azuresql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "dataset_for_arcive",
-											"type": "DatasetReference",
-											"parameters": {
-												"container": "arcive",
-												"file": {
-													"value": " ",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "delete_from_azureblob_after arcive",
-									"type": "Delete",
-									"dependsOn": [
-										{
-											"activity": "arcive-from_azureblob_to_arcivefolder",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										},
-										"enableLogging": false,
-										"storeSettings": {
-											"type": "AzureBlobStorageReadSettings",
-											"recursive": true,
-											"enablePartitionDiscovery": false
-										}
-									}
-								},
-								{
-									"name": "Lookup_to get_max_update_date_from_trans_table",
-									"type": "Lookup",
-									"dependsOn": [
-										{
-											"activity": "delete_from_azureblob_after arcive",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": {
-												"value": "select max(@{item().WATERMARK_COLUMN}) as max_update_date from   @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME}",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "sqlserver_db_onprem",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": " ",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": " ",
-													"type": "Expression"
-												}
-											}
-										}
-									}
-								},
-								{
-									"name": "Set_max_update_date",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Lookup_to get_max_update_date_from_trans_table",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "v_max_update_date",
-										"value": {
-											"value": "@STRING(activity('Lookup_to get_max_update_date_from_trans_table').output.firstRow.max_update_date)\n\n\n",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "update_proceed_date_as max_date_on_cntrl_table",
-									"type": "Script",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase1",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "update METADATA.CONTROL_TABLE set PROCESSED_DATE='@{variables('v_max_update_date')}' where control_id=@{item().CONTROL_ID}\n\n\n",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								},
-								{
-									"name": "update_proceed_date_as max_date_on_cntrl_table_using_sp",
-									"type": "SqlServerStoredProcedure",
-									"dependsOn": [
-										{
-											"activity": "Set_max_update_date",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[dbo].[update_PROCESSED_DATE]",
-										"storedProcedureParameters": {
-											"in_CONTROL_ID": {
-												"value": {
-													"value": "@item().CONTROL_ID",
-													"type": "Expression"
-												}
-											},
-											"in_PROCESSED_DATE": {
-												"value": {
-													"value": "@variables('v_max_update_date')",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase1",
-										"type": "LinkedServiceReference"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"source_system": {
-						"type": "string",
-						"defaultValue": "SQL_SERVER"
-					},
-					"load_type": {
-						"type": "string",
-						"defaultValue": "INCR"
-					}
-				},
-				"variables": {
-					"max_update_date": {
-						"type": "String"
-					},
-					"v_max_update_date": {
-						"type": "String"
-					},
-					"max_updat_date": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "class_HW_folder"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-10T22:01:35Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/project_flow_with_cntrl_table_incr_with_swithc_activity')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup_on_cntrl_table_for_incr_load",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "select * from METADATA.CONTROL_TABLE where source_system='@{pipeline().parameters.source_system}' AND LOAD_TYPE='@{pipeline().parameters.load_type}'",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "AzureSql_dataset_withparam",
-								"type": "DatasetReference",
-								"parameters": {
-									"table_name": "CONTROL_TABLE",
-									"schema_name": "METADATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach1",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Lookup_on_cntrl_table_for_incr_load",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup_on_cntrl_table_for_incr_load').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "onprem_sql_to azureblob",
-									"type": "Copy",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [
-										{
-											"activity": "Lookup_to get_max_update_date_from_trans_table",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": {
-												"value": "select * from @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME}\n\n",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "CLAIM_ID"
-													},
-													"sink": {
-														"name": "CLAIM_ID"
-													}
-												},
-												{
-													"source": {
-														"name": "CLAIM_NUMBER"
-													},
-													"sink": {
-														"name": "CLAIM_NUMBER"
-													}
-												},
-												{
-													"source": {
-														"name": "CLAIM_TYPE"
-													},
-													"sink": {
-														"name": "CLAIM_TYPE"
-													}
-												},
-												{
-													"source": {
-														"name": "LOCATION"
-													},
-													"sink": {
-														"name": "CLAIM_LOCATION"
-													}
-												}
-											],
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "sqlserver_db_onprem",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": "@item().SOURCE_TABLE_SCHEMA",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": "@item().SOURCE_TABLE_NAME",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": {
-													"value": "@concat(item().TARGET_TABLE,'.csv')",
-													"type": "Expression"
-												},
-												"folder_name": {
-													"value": "@item().TARGET_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "azureblob_to_azuresql",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "Switch1",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false,
-											"tableOption": "autoCreate",
-											"disableMetricsCollection": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "AzureSql_dataset_withparam",
-											"type": "DatasetReference",
-											"parameters": {
-												"table_name": {
-													"value": "@item().TARGET_TABLE",
-													"type": "Expression"
-												},
-												"schema_name": {
-													"value": "@item().TARGET_TABLE_SCHEMA",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "arcive-from_azureblob_to_arcivefolder",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "azureblob_to_azuresql",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobStorageReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "dataset_for_arcive",
-											"type": "DatasetReference",
-											"parameters": {
-												"container": "arcive",
-												"file": {
-													"value": " ",
-													"type": "Expression"
-												},
-												"folder": {
-													"value": " ",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"name": "delete_from_azureblob_after arcive",
-									"type": "Delete",
-									"dependsOn": [
-										{
-											"activity": "arcive-from_azureblob_to_arcivefolder",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "azureblob_storage_with_param",
-											"type": "DatasetReference",
-											"parameters": {
-												"contanier_name": "project-folder",
-												"filename": "@concat(item().TARGET_TABLE,'.csv')",
-												"folder_name": "@item().TARGET_TABLE_SCHEMA"
-											}
-										},
-										"enableLogging": false,
-										"storeSettings": {
-											"type": "AzureBlobStorageReadSettings",
-											"recursive": true,
-											"enablePartitionDiscovery": false
-										}
-									}
-								},
-								{
-									"name": "Lookup_to get_max_update_date_from_trans_table",
-									"type": "Lookup",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [
-										{
-											"activity": "delete_from_azureblob_after arcive",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": {
-												"value": "select max(@{item().WATERMARK_COLUMN}) as max_update_date from   @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME}",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "sqlserver_db_onprem",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema_name": {
-													"value": " ",
-													"type": "Expression"
-												},
-												"table_name": {
-													"value": " ",
-													"type": "Expression"
-												}
-											}
-										}
-									}
-								},
-								{
-									"name": "update_proceed_date_as max_date_on_cntrl_table",
-									"type": "Script",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase1",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "update METADATA.CONTROL_TABLE set PROCESSED_DATE='@{variables('v_max_update_date')}' where control_id=@{item().CONTROL_ID}\n\n\n",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								},
-								{
-									"name": "update_proceed_date_as max_date_on_cntrl_table_using_sp",
-									"type": "SqlServerStoredProcedure",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [
-										{
-											"activity": "onprem_sql_to azureblob",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"storedProcedureName": "[[dbo].[update_PROCESSED_DATE]",
-										"storedProcedureParameters": {
-											"in_CONTROL_ID": {
-												"value": {
-													"value": "@item().CONTROL_ID",
-													"type": "Expression"
-												}
-											},
-											"in_PROCESSED_DATE": {
-												"value": {
-													"value": "@variables('v_max_update_date')",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase1",
-										"type": "LinkedServiceReference"
-									}
-								},
-								{
-									"name": "Switch1",
-									"type": "Switch",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"on": {
-											"value": "@item().SOURCE_TABLE_NAME",
-											"type": "Expression"
-										},
-										"cases": [
-											{
-												"value": "CLAIM",
-												"activities": [
-													{
-														"name": "onprem_sql_to azureblob_claim",
-														"type": "Copy",
-														"dependsOn": [],
-														"policy": {
-															"timeout": "0.12:00:00",
-															"retry": 0,
-															"retryIntervalInSeconds": 30,
-															"secureOutput": false,
-															"secureInput": false
-														},
-														"userProperties": [],
-														"typeProperties": {
-															"source": {
-																"type": "SqlServerSource",
-																"sqlReaderQuery": {
-																	"value": "select * from @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME}\n\n",
-																	"type": "Expression"
-																},
-																"queryTimeout": "02:00:00",
-																"partitionOption": "None"
-															},
-															"sink": {
-																"type": "DelimitedTextSink",
-																"storeSettings": {
-																	"type": "AzureBlobStorageWriteSettings"
-																},
-																"formatSettings": {
-																	"type": "DelimitedTextWriteSettings",
-																	"quoteAllText": true,
-																	"fileExtension": ".txt"
-																}
-															},
-															"enableStaging": false,
-															"translator": {
-																"type": "TabularTranslator",
-																"mappings": [
-																	{
-																		"source": {
-																			"name": "CLAIM_ID"
-																		},
-																		"sink": {
-																			"name": "CLAIM_ID"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "CLAIM_NUMBER"
-																		},
-																		"sink": {
-																			"name": "CLAIM_NUMBER"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "CLAIM_TYPE"
-																		},
-																		"sink": {
-																			"name": "CLAIM_TYPE"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "LOCATION"
-																		},
-																		"sink": {
-																			"name": "CLAIM_LOCATION"
-																		}
-																	}
-																],
-																"typeConversion": true,
-																"typeConversionSettings": {
-																	"allowDataTruncation": true,
-																	"treatBooleanAsNumber": false
-																}
-															}
-														},
-														"inputs": [
-															{
-																"referenceName": "sqlserver_db_onprem",
-																"type": "DatasetReference",
-																"parameters": {
-																	"schema_name": {
-																		"value": "@item().SOURCE_TABLE_SCHEMA",
-																		"type": "Expression"
-																	},
-																	"table_name": {
-																		"value": "@item().SOURCE_TABLE_NAME",
-																		"type": "Expression"
-																	}
-																}
-															}
-														],
-														"outputs": [
-															{
-																"referenceName": "azureblob_storage_with_param",
-																"type": "DatasetReference",
-																"parameters": {
-																	"contanier_name": "project-folder",
-																	"filename": {
-																		"value": "@concat(item().TARGET_TABLE,'.csv')",
-																		"type": "Expression"
-																	},
-																	"folder_name": {
-																		"value": "@item().TARGET_TABLE_SCHEMA",
-																		"type": "Expression"
-																	}
-																}
-															}
-														]
-													}
-												]
-											},
-											{
-												"value": "INCIDENT",
-												"activities": [
-													{
-														"name": "onprem_sql_to azureblob_claim_copy1",
-														"type": "Copy",
-														"dependsOn": [],
-														"policy": {
-															"timeout": "0.12:00:00",
-															"retry": 0,
-															"retryIntervalInSeconds": 30,
-															"secureOutput": false,
-															"secureInput": false
-														},
-														"userProperties": [],
-														"typeProperties": {
-															"source": {
-																"type": "SqlServerSource",
-																"sqlReaderQuery": {
-																	"value": "select * from @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME}\n\n",
-																	"type": "Expression"
-																},
-																"queryTimeout": "02:00:00",
-																"partitionOption": "None"
-															},
-															"sink": {
-																"type": "DelimitedTextSink",
-																"storeSettings": {
-																	"type": "AzureBlobStorageWriteSettings"
-																},
-																"formatSettings": {
-																	"type": "DelimitedTextWriteSettings",
-																	"quoteAllText": true,
-																	"fileExtension": ".txt"
-																}
-															},
-															"enableStaging": false,
-															"translator": {
-																"type": "TabularTranslator",
-																"mappings": [
-																	{
-																		"source": {
-																			"name": "INCIDENT_ID"
-																		},
-																		"sink": {
-																			"name": "INCIDENT_ID"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "INCIDENT_NUMBER"
-																		},
-																		"sink": {
-																			"name": "INCIDENT_NUMBER"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "INCIDENT_TYPE"
-																		},
-																		"sink": {
-																			"name": "INCIDENT_TYPE"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "LOCATION"
-																		},
-																		"sink": {
-																			"name": "INCIDENT_LOCATION"
-																		}
-																	}
-																],
-																"typeConversion": true,
-																"typeConversionSettings": {
-																	"allowDataTruncation": true,
-																	"treatBooleanAsNumber": false
-																}
-															}
-														},
-														"inputs": [
-															{
-																"referenceName": "sqlserver_db_onprem",
-																"type": "DatasetReference",
-																"parameters": {
-																	"schema_name": {
-																		"value": "@item().SOURCE_TABLE_SCHEMA",
-																		"type": "Expression"
-																	},
-																	"table_name": {
-																		"value": "@item().SOURCE_TABLE_NAME",
-																		"type": "Expression"
-																	}
-																}
-															}
-														],
-														"outputs": [
-															{
-																"referenceName": "azureblob_storage_with_param",
-																"type": "DatasetReference",
-																"parameters": {
-																	"contanier_name": "project-folder",
-																	"filename": {
-																		"value": "@concat(item().TARGET_TABLE,'.csv')",
-																		"type": "Expression"
-																	},
-																	"folder_name": {
-																		"value": "@item().TARGET_TABLE_SCHEMA",
-																		"type": "Expression"
-																	}
-																}
-															}
-														]
-													}
-												]
-											},
-											{
-												"value": "OCCERANCE",
-												"activities": [
-													{
-														"name": "onprem_sql_to azureblob_claim_copy2",
-														"type": "Copy",
-														"dependsOn": [],
-														"policy": {
-															"timeout": "0.12:00:00",
-															"retry": 0,
-															"retryIntervalInSeconds": 30,
-															"secureOutput": false,
-															"secureInput": false
-														},
-														"userProperties": [],
-														"typeProperties": {
-															"source": {
-																"type": "SqlServerSource",
-																"sqlReaderQuery": {
-																	"value": "select * from @{item().SOURCE_TABLE_SCHEMA}.@{item().SOURCE_TABLE_NAME}\n\n",
-																	"type": "Expression"
-																},
-																"queryTimeout": "02:00:00",
-																"partitionOption": "None"
-															},
-															"sink": {
-																"type": "DelimitedTextSink",
-																"storeSettings": {
-																	"type": "AzureBlobStorageWriteSettings"
-																},
-																"formatSettings": {
-																	"type": "DelimitedTextWriteSettings",
-																	"quoteAllText": true,
-																	"fileExtension": ".txt"
-																}
-															},
-															"enableStaging": false,
-															"translator": {
-																"type": "TabularTranslator",
-																"mappings": [
-																	{
-																		"source": {
-																			"name": "OCCERANCE_ID"
-																		},
-																		"sink": {
-																			"name": "OCCERANCE_ID"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "OCCERANCE_NUMBER"
-																		},
-																		"sink": {
-																			"name": "OCCERANCE_NUMBER"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "OCCERANCE_TYPE"
-																		},
-																		"sink": {
-																			"name": "OCCERANCE_TYPE"
-																		}
-																	},
-																	{
-																		"source": {
-																			"name": "LOCATION"
-																		},
-																		"sink": {
-																			"name": "OCCERANCE_LOCATION"
-																		}
-																	}
-																],
-																"typeConversion": true,
-																"typeConversionSettings": {
-																	"allowDataTruncation": true,
-																	"treatBooleanAsNumber": false
-																}
-															}
-														},
-														"inputs": [
-															{
-																"referenceName": "sqlserver_db_onprem",
-																"type": "DatasetReference",
-																"parameters": {
-																	"schema_name": {
-																		"value": "@item().SOURCE_TABLE_SCHEMA",
-																		"type": "Expression"
-																	},
-																	"table_name": {
-																		"value": "@item().SOURCE_TABLE_NAME",
-																		"type": "Expression"
-																	}
-																}
-															}
-														],
-														"outputs": [
-															{
-																"referenceName": "azureblob_storage_with_param",
-																"type": "DatasetReference",
-																"parameters": {
-																	"contanier_name": "project-folder",
-																	"filename": {
-																		"value": "@concat(item().TARGET_TABLE,'.csv')",
-																		"type": "Expression"
-																	},
-																	"folder_name": {
-																		"value": "@item().TARGET_TABLE_SCHEMA",
-																		"type": "Expression"
-																	}
-																}
-															}
-														]
-													}
-												]
-											}
-										]
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"source_system": {
-						"type": "string",
-						"defaultValue": "SQL_SERVER"
-					},
-					"load_type": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"max_update_date": {
-						"type": "String"
-					},
-					"v_max_update_date": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "class_HW_folder"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-09T22:03:54Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/scd type2withlkp')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "scdtype2withlkp",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "scdtype2withlkp",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"empsrc": {
-										"schema_name": "dbo",
-										"table_name": "emp2src"
-									},
-									"sinkforlkp": {
-										"schema_name": "dbo",
-										"table_name": "emp2"
-									},
-									"sink1": {
-										"schema_name": "dbo",
-										"table_name": "emp2"
-									},
-									"sink2": {
-										"schema_name": "dbo",
-										"table_name": "emp2"
-									}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-24T19:45:56Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/scd1flowtabletotable')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "scd1flowtabletotable",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "scd1flowtabletotable",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"empsrc": {
-										"schema_name": "dbo",
-										"table_name": "emp1src"
-									},
-									"sinkforlkp": {
-										"schema_name": "dbo",
-										"table_name": "emp1"
-									},
-									"sink1": {
-										"schema_name": "dbo",
-										"table_name": "emp1"
-									},
-									"sink2": {
-										"schema_name": "dbo",
-										"table_name": "emp1"
-									}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-12-26T23:08:15Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/senario10_split_singl_col_into_multiple_rows')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "senario10_split_singl_col_into_multiple_rows",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "senario10_split_singl_col_into_multiple_rows",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {
-										"container_name": "project-folder",
-										"folder_name": "src_folder",
-										"file_name": "senario10.csv"
-									},
-									"sink1": {
-										"container_name": "project-folder",
-										"folder_name": "tgt_folder",
-										"file_name": "senario10.csv"
-									}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "senario"
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-01-30T20:46:02Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/senario11_mrg_multpl_row_val_into_sngl_row')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "senario11_mrg_multpl_row_val_into_sngl_row",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "senario11_mrg_multpl_row_val_into_sngl_row",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {
-										"container_name": "project-folder",
-										"folder_name": "tgt_folder",
-										"file_name": "senario10.csv"
-									},
-									"sink1": {
-										"container_name": "project-folder",
-										"folder_name": "src_folder",
-										"file_name": "senario11tgt.csv"
-									}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "senario"
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-01-30T20:34:19Z"
 			},
 			"dependsOn": []
 		}
