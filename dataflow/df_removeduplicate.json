@@ -26,6 +26,9 @@
 			"transformations": [
 				{
 					"name": "union1"
+				},
+				{
+					"name": "toremoveduprow"
 				}
 			],
 			"scriptLines": [
@@ -45,7 +48,9 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source2",
-				"source1, source2 union(byName: true)~> union1"
+				"source1, source2 union(byName: true)~> union1",
+				"union1 aggregate(groupBy(empid),",
+				"     each(match(name != 'empid'), $$ = first($$))) ~> toremoveduprow"
 			]
 		}
 	}
