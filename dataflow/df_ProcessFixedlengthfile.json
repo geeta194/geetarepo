@@ -9,7 +9,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "azureblob_storage_with_param",
+						"referenceName": "DelimitedText2",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -19,17 +19,7 @@
 			"transformations": [],
 			"scriptLines": [
 				"source(output(",
-				"          EMPLOYEE_ID as string,",
-				"          FIRST_NAME as string,",
-				"          LAST_NAME as string,",
-				"          EMAIL as string,",
-				"          PHONE_NUMBER as string,",
-				"          HIRE_DATE as string,",
-				"          JOB_ID as string,",
-				"          SALARY as string,",
-				"          COMMISSION_PCT as string,",
-				"          MANAGER_ID as string,",
-				"          DEPARTMENT_ID as string",
+				"          {_col0_} as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
